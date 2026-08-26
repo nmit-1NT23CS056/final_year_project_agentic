@@ -9,6 +9,7 @@ import io
 import os
 import json
 from google import genai
+from fastapi_cache.decorator import cache
 
 router = APIRouter(prefix="/api/profile", tags=["profile"])
 
@@ -40,6 +41,7 @@ def update_profile(profile_data: ProfileUpdate, current_user: models.User = Depe
     return {"message": "Profile updated successfully", "profile": profile}
 
 @router.get("/")
+@cache(expire=300)
 def get_profile(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user.id).first()
     if not profile:

@@ -1,12 +1,32 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import auth, profile, roadmap
+from routers import auth, profile, roadmap, knowledge
+from contextlib import asynccontextmanager
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from redis import asyncio as aioredis
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Career Advisory Agent API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize Redis caching
+    redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
+    try:
+        redis = aioredis.from_url(redis_url, encoding="utf8", decode_responses=True)
+        FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+        print("Redis Caching Successfully Initialized!")
+    except Exception as e:
+        print("Warning: Redis could not connect. Proceeding without cache.")
+    yield
+
+app = FastAPI(title="Career Advisory Agent API", lifespan=lifespan)
 
 # Configure CORS for the React frontend
 app.add_middleware(
@@ -21,6 +41,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(roadmap.router)
+app.include_router(knowledge.router)
 
 @app.get("/")
 def read_root():

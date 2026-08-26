@@ -40,7 +40,11 @@ export default function Dashboard() {
     setRoadmap(null);
     try {
       const res = await api.post('/roadmap/generate');
-      setRoadmap(res.data.roadmap);
+      let data = res.data.roadmap;
+      if (typeof data === 'object') {
+        data = JSON.stringify(data, null, 2);
+      }
+      setRoadmap(data);
     } catch (error) {
       console.error(error);
       alert("Failed to generate roadmap.");
