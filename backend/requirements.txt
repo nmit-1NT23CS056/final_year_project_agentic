@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+bcrypt
+pyjwt
+pydantic
+python-dotenv
+langchain
+langgraph
+google-genai
+tavily-python
