@@ -1,48 +1,56 @@
-import { useContext } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthContext } from './context/AuthContext'
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Assessment from './pages/Assessment'
 
-// A wrapper for protected routes
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useContext(AuthContext);
-  
-  if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
-  if (!user) return <Navigate to="/login" replace />;
-  
-  return children;
-};
-
 function App() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={
+        <SignedOut>
+          <Login />
+        </SignedOut>
+      } />
+      <Route path="/register" element={
+        <SignedOut>
+          <Register />
+        </SignedOut>
+      } />
       
       {/* Protected Routes */}
       <Route 
         path="/dashboard" 
         element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/assessment" 
-        element={
-          <ProtectedRoute>
-            <Assessment />
-          </ProtectedRoute>
+          <>
+            <SignedIn>
+              <Dashboard />
+            </SignedIn>
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
+          </>
         } 
       />
       
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route 
+        path="/assessment" 
+        element={
+          <>
+            <SignedIn>
+              <Assessment />
+            </SignedIn>
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
+          </>
+        } 
+      />
+      
+      {/* Default Redirect */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )
 }

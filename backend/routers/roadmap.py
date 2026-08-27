@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from routers.auth import get_current_user
+from security import get_current_user
 from agent import career_agent
 
 router = APIRouter(prefix="/api/roadmap", tags=["roadmap"])
 
 @router.post("/generate")
-def generate_roadmap(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def generate_roadmap(current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
     # 1. Fetch the user's profile from SQLite
-    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user.id).first()
+    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user_id).first()
     if not profile:
         raise HTTPException(status_code=400, detail="Profile not found. Please complete the assessment first.")
         
@@ -27,7 +27,7 @@ def generate_roadmap(current_user: models.User = Depends(get_current_user), db: 
     }
     
     initial_state = {
-        "user_id": current_user.id,
+        "user_id": current_user_id,
         "profile_data": profile_dict,
         "revision_count": 0
     }

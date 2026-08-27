@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from routers.auth import get_current_user
+from security import get_current_user
 from pydantic import BaseModel
 import pdfplumber
 import io
@@ -24,12 +24,12 @@ class ProfileUpdate(BaseModel):
     eq_motivation: float
 
 @router.post("/")
-def update_profile(profile_data: ProfileUpdate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+def update_profile(profile_data: ProfileUpdate, current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
     # Check if profile exists
-    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user.id).first()
+    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user_id).first()
     
     if not profile:
-        profile = models.AssessmentProfile(user_id=current_user.id)
+        profile = models.AssessmentProfile(user_id=current_user_id)
         db.add(profile)
     
     # Update fields
@@ -42,14 +42,14 @@ def update_profile(profile_data: ProfileUpdate, current_user: models.User = Depe
 
 @router.get("/")
 @cache(expire=300)
-def get_profile(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user.id).first()
+def get_profile(current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user_id).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile
 
 @router.post("/upload-resume")
-async def parse_resume(file: UploadFile = File(...), current_user: models.User = Depends(get_current_user)):
+async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depends(get_current_user)):
     if not file.filename.endswith('.pdf'):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
     
