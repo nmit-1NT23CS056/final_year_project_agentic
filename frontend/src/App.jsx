@@ -3,6 +3,7 @@ import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
+import Jobs from './pages/Jobs'
 import Assessment from './pages/Assessment'
 
 function App() {
@@ -21,6 +22,19 @@ function App() {
       } />
       
       {/* Protected Routes */}
+      <Route 
+        path="/jobs" 
+        element={
+          <>
+            <SignedIn>
+              <Jobs />
+            </SignedIn>
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
+          </>
+        } 
+      />
       <Route 
         path="/dashboard" 
         element={

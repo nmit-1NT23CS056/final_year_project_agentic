@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import profile, roadmap, knowledge
+from routers import profile, roadmap, knowledge, jobs
 from contextlib import asynccontextmanager
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -42,6 +42,7 @@ app.add_middleware(
 app.include_router(profile.router)
 app.include_router(roadmap.router)
 app.include_router(knowledge.router)
+app.include_router(jobs.router)
 
 @app.get("/")
 def read_root():

@@ -18,3 +18,15 @@ class AssessmentProfile(Base):
     eq_empathy = Column(Float, default=0.0)
     eq_self_regulation = Column(Float, default=0.0)
     eq_motivation = Column(Float, default=0.0)
+
+class JobMatch(Base):
+    __tablename__ = "job_matches"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, index=True)
+    job_title = Column(String)
+    company = Column(String)
+    job_description = Column(String)
+    match_score = Column(String)
+    tailored_cover_letter = Column(String)
+    status = Column(String, default="Found")
