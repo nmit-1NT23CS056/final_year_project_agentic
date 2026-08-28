@@ -1,23 +1,18 @@
-from sqlalchemy import Boolean, Column, Integer, String, Float
+from sqlalchemy import Boolean, Column, Integer, String, Float, Text
 from database import Base
 
-class AssessmentProfile(Base):
-    __tablename__ = "assessment_profiles"
+class CandidateProfile(Base):
+    __tablename__ = "candidate_profiles"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String, unique=True, index=True) # Clerk user ID
     
-    # 5-Dimensional Scores
-    technical_skills_score = Column(Float, default=0.0)
-    soft_skills_score = Column(Float, default=0.0)
-    career_motivator = Column(String) # e.g., 'Impact', 'Compensation', 'Work-Life Balance'
-    personality_type = Column(String) # e.g., INTJ, etc.
-    
-    # EQ Scores (Mayer-Salovey-Caruso model)
-    eq_self_awareness = Column(Float, default=0.0)
-    eq_empathy = Column(Float, default=0.0)
-    eq_self_regulation = Column(Float, default=0.0)
-    eq_motivation = Column(Float, default=0.0)
+    current_role = Column(String, default="Unknown")
+    years_of_experience = Column(Integer, default=0)
+    core_skills = Column(Text, default="[]") # JSON string
+    market_demand_score = Column(Integer, default=0)
+    skill_gaps = Column(Text, default="[]") # JSON string
+    career_motivator = Column(String, default="")
 
 class JobMatch(Base):
     __tablename__ = "job_matches"

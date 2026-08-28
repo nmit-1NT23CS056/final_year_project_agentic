@@ -10,20 +10,18 @@ router = APIRouter(prefix="/api/roadmap", tags=["roadmap"])
 @router.post("/generate")
 def generate_roadmap(current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
     # 1. Fetch the user's profile from SQLite
-    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user_id).first()
+    profile = db.query(models.CandidateProfile).filter(models.CandidateProfile.user_id == current_user_id).first()
     if not profile:
         raise HTTPException(status_code=400, detail="Profile not found. Please complete the assessment first.")
         
     # 2. Convert to dictionary to pass into our LangGraph State
     profile_dict = {
-        "technical_skills_score": profile.technical_skills_score,
-        "soft_skills_score": profile.soft_skills_score,
+        "current_role": profile.current_role,
+        "years_of_experience": profile.years_of_experience,
+        "core_skills": profile.core_skills,
+        "skill_gaps": profile.skill_gaps,
         "career_motivator": profile.career_motivator,
-        "personality_type": profile.personality_type,
-        "eq_self_awareness": profile.eq_self_awareness,
-        "eq_empathy": profile.eq_empathy,
-        "eq_self_regulation": profile.eq_self_regulation,
-        "eq_motivation": profile.eq_motivation
+        "market_demand_score": profile.market_demand_score
     }
     
     initial_state = {

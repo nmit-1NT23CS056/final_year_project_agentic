@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Jobs from './pages/Jobs'
 import Assessment from './pages/Assessment'
+import Roadmap from './pages/Roadmap'
 
 function App() {
   return (
@@ -30,7 +31,7 @@ function App() {
               <Jobs />
             </SignedIn>
             <SignedOut>
-              <RedirectToSignIn />
+              <Navigate to="/login" replace />
             </SignedOut>
           </>
         } 
@@ -43,7 +44,7 @@ function App() {
               <Dashboard />
             </SignedIn>
             <SignedOut>
-              <RedirectToSignIn />
+              <Navigate to="/login" replace />
             </SignedOut>
           </>
         } 
@@ -57,7 +58,21 @@ function App() {
               <Assessment />
             </SignedIn>
             <SignedOut>
-              <RedirectToSignIn />
+              <Navigate to="/login" replace />
+            </SignedOut>
+          </>
+        } 
+      />
+      
+      <Route 
+        path="/roadmap" 
+        element={
+          <>
+            <SignedIn>
+              <Roadmap />
+            </SignedIn>
+            <SignedOut>
+              <Navigate to="/login" replace />
             </SignedOut>
           </>
         } 

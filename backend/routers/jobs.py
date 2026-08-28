@@ -14,19 +14,19 @@ def get_jobs(db: Session = Depends(get_db), current_user: str = Depends(get_curr
 
 @router.post("/scan")
 def trigger_job_scan(db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
-    profile = db.query(models.AssessmentProfile).filter(models.AssessmentProfile.user_id == current_user).first()
+    profile = db.query(models.CandidateProfile).filter(models.CandidateProfile.user_id == current_user).first()
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found. Please complete assessment.")
         
     profile_data = {
-        "technical_skills_score": profile.technical_skills_score,
-        "soft_skills_score": profile.soft_skills_score,
-        "career_motivator": profile.career_motivator,
-        "personality_type": profile.personality_type
+        "current_role": profile.current_role,
+        "years_of_experience": profile.years_of_experience,
+        "core_skills": profile.core_skills,
+        "career_motivator": profile.career_motivator
     }
     
     # Run the agent
-    found_jobs = scan_for_jobs(profile_data, current_user)
+    found_jobs = scan_for_jobs(profile_data)
     
     # Save to database
     for j in found_jobs:
