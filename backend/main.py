@@ -38,7 +38,6 @@ app.add_middleware(
 )
 
 # Include Routers
-# app.include_router(auth.router)
 app.include_router(profile.router)
 app.include_router(roadmap.router)
 app.include_router(knowledge.router)

@@ -67,7 +67,7 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         
         response = safe_generate_content(
             client=client,
-            model='gemini-2.5-flash',
+            model='gemini-3.5-flash',
             contents=prompt
         )
         
@@ -97,7 +97,7 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         '''
         gap_response = safe_generate_content(
             client=client,
-            model='gemini-2.5-flash',
+            model='gemini-3.5-flash',
             contents=gap_prompt
         )
         

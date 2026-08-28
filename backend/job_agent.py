@@ -22,7 +22,7 @@ def scan_for_jobs(profile_data: dict) -> list:
     search_results = search.invoke({"query": query})
     
     # 2. Let Gemini filter and rank the jobs, then write cover letters
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
     
     prompt = f'''
     You are an elite Autonomous Job Hunter Agent.

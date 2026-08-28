@@ -3,8 +3,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Dict, Any
 import os
-from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
-from google.api_core.exceptions import ResourceExhausted
+from tenacity import retry, wait_exponential, stop_after_attempt
 
 @retry(wait=wait_exponential(multiplier=1, min=4, max=30), stop=stop_after_attempt(5))
 def safe_invoke_llm(llm, prompt_messages):
@@ -21,7 +20,7 @@ class AgentState(TypedDict):
 
 def strategist_node(state: AgentState):
     print("Strategist: Drafting the initial roadmap...")
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
     profile = state.get("profile_data", {})
     
     # Updated Profile Extraction based on new JSON
@@ -68,7 +67,7 @@ def strategist_node(state: AgentState):
 
 def critic_node(state: AgentState):
     print(f"Critic: Reviewing draft (Revision {state['revision_count']})...")
-    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
     
     prompt = f'''
     You are an elite Career Coach and Critic. Review this roadmap draft.
