@@ -10,6 +10,11 @@ import pdfplumber
 from google import genai
 from fastapi_cache.decorator import cache
 from langchain_community.tools.tavily_search import TavilySearchResults
+from tenacity import retry, wait_exponential, stop_after_attempt
+
+@retry(wait=wait_exponential(multiplier=1, min=4, max=30), stop=stop_after_attempt(5))
+def safe_generate_content(client, model, contents):
+    return client.models.generate_content(model=model, contents=contents)
 
 router = APIRouter(prefix="/api/profile", tags=["profile"])
 
@@ -60,7 +65,8 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         {resume_text[:4000]}
         '''
         
-        response = client.models.generate_content(
+        response = safe_generate_content(
+            client=client,
             model='gemini-2.5-flash',
             contents=prompt
         )
@@ -89,7 +95,8 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
             "skill_gaps": ["List", "of", "missing", "skills"]
         }}
         '''
-        gap_response = client.models.generate_content(
+        gap_response = safe_generate_content(
+            client=client,
             model='gemini-2.5-flash',
             contents=gap_prompt
         )
@@ -116,4 +123,6 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         return {"message": "Profile analyzed and saved successfully", "profile": profile}
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to analyze profile: {str(e)}")

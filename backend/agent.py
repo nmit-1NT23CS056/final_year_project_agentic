@@ -3,6 +3,12 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Dict, Any
 import os
+from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
+from google.api_core.exceptions import ResourceExhausted
+
+@retry(wait=wait_exponential(multiplier=1, min=4, max=30), stop=stop_after_attempt(5))
+def safe_invoke_llm(llm, prompt_messages):
+    return llm.invoke(prompt_messages)
 
 # Define the state for the agents
 class AgentState(TypedDict):
@@ -34,7 +40,13 @@ def strategist_node(state: AgentState):
     - Verified Skills: {skills}
     - Market Gaps to Fill: {gaps}
     - Primary Motivator: {motivator}
+    '''
     
+    feedback = state.get("critic_feedback")
+    if feedback and feedback != "APPROVED":
+        prompt += f"\n\nPREVIOUS CRITIC FEEDBACK TO INCORPORATE:\n{feedback}"
+        
+    prompt += '''
     Your plan MUST address how to learn those exact missing market gaps over the next 3 months.
     
     CRITICAL FORMATTING INSTRUCTIONS:
@@ -45,7 +57,7 @@ def strategist_node(state: AgentState):
     - Keep it clean, professional, and visually structured. Do NOT output a single wall of text.
     '''
     
-    response = llm.invoke([SystemMessage(content="You are a career strategist."), HumanMessage(content=prompt)])
+    response = safe_invoke_llm(llm, [SystemMessage(content="You are a career strategist."), HumanMessage(content=prompt)])
     content = response.content
     if isinstance(content, list):
         draft = " ".join([c.get("text", "") for c in content if isinstance(c, dict) and "text" in c])
@@ -68,7 +80,7 @@ def critic_node(state: AgentState):
     {state['draft_roadmap']}
     '''
     
-    response = llm.invoke([SystemMessage(content="You are a harsh but fair critic."), HumanMessage(content=prompt)])
+    response = safe_invoke_llm(llm, [SystemMessage(content="You are a harsh but fair critic."), HumanMessage(content=prompt)])
     content = response.content
     if isinstance(content, list):
         # Extract text if it's a list of blocks

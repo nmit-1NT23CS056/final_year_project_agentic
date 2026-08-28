@@ -3,6 +3,11 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_community.tools.tavily_search import TavilySearchResults
 import os
 import json
+from tenacity import retry, wait_exponential, stop_after_attempt
+
+@retry(wait=wait_exponential(multiplier=1, min=4, max=30), stop=stop_after_attempt(5))
+def safe_invoke_llm(llm, prompt_messages):
+    return llm.invoke(prompt_messages)
 
 def scan_for_jobs(profile_data: dict) -> list:
     print("Job Agent: Scanning for jobs...")
@@ -39,7 +44,7 @@ def scan_for_jobs(profile_data: dict) -> list:
     NO MARKDOWN, JUST RAW JSON ARRAY.
     '''
     
-    response = llm.invoke([SystemMessage(content="You are a Job Agent."), HumanMessage(content=prompt)])
+    response = safe_invoke_llm(llm, [SystemMessage(content="You are a Job Matcher."), HumanMessage(content=prompt)])
     
     try:
         json_text = response.content.replace("`json", "").replace("`", "").strip()
