@@ -13,6 +13,7 @@ class CandidateProfile(Base):
     market_demand_score = Column(Integer, default=0)
     skill_gaps = Column(Text, default="[]") # JSON string
     career_motivator = Column(String, default="")
+    saved_roadmap = Column(Text, nullable=True) # Stores the cached JSON roadmap
 
 class JobMatch(Base):
     __tablename__ = "job_matches"

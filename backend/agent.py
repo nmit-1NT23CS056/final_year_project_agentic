@@ -72,14 +72,15 @@ def critic_node(state: AgentState):
     prompt = f'''
     You are an elite Career Coach and Critic. Review this roadmap draft.
     Does it directly address closing the candidate's skill gaps? Is it realistic for a {state['profile_data'].get("years_of_experience")} YOE {state['profile_data'].get("current_role")}?
-    If it is excellent, reply with EXACTLY "APPROVED".
-    If it needs improvement, provide 2-3 specific feedback points.
+    
+    IMPORTANT: You are focused on speed and efficiency. Unless there are GLARING, critical errors in the plan, you must reply with EXACTLY "APPROVED". 
+    Only reject it if it is completely unusable.
     
     Draft:
     {state['draft_roadmap']}
     '''
     
-    response = safe_invoke_llm(llm, [SystemMessage(content="You are a harsh but fair critic."), HumanMessage(content=prompt)])
+    response = safe_invoke_llm(llm, [SystemMessage(content="You are a lenient but fair critic."), HumanMessage(content=prompt)])
     content = response.content
     if isinstance(content, list):
         # Extract text if it's a list of blocks
@@ -88,7 +89,8 @@ def critic_node(state: AgentState):
     else:
         feedback = str(content).strip()
     
-    if "APPROVED" in feedback.upper() or state["revision_count"] >= 2:
+    # Cap the argument at 1 revision to ensure speed (2 passes total maximum)
+    if "APPROVED" in feedback.upper() or state["revision_count"] >= 1:
         return {"final_roadmap": state["draft_roadmap"], "critic_feedback": "APPROVED"}
     else:
         return {"critic_feedback": feedback, "revision_count": state["revision_count"] + 1}

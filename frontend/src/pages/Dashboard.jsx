@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
 import { useNavigate, Navigate, Link } from 'react-router-dom';
 import api from '../lib/axios';
-import { Briefcase, BrainCircuit, LineChart, Loader2, TrendingUp, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Briefcase, BrainCircuit, LineChart, Loader2, TrendingUp, AlertTriangle, CheckCircle2, BookOpen } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export default function Dashboard() {
@@ -21,7 +21,8 @@ export default function Dashboard() {
     const fetchProfile = async () => {
       try {
         const token = await getToken();
-        const res = await api.get('/profile/', {
+        // Add timestamp to strictly bypass any aggressive browser caching
+        const res = await api.get(`/profile/?t=${new Date().getTime()}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setProfile(res.data);
@@ -55,7 +56,8 @@ export default function Dashboard() {
       navigate('/roadmap', { state: { roadmap: data } });
     } catch (error) {
       console.error(error);
-      alert("Failed to generate roadmap.");
+      const errMsg = error.response?.data?.detail || "Failed to generate roadmap.";
+      alert(`Error: ${errMsg}\n\n(If it says RateLimitError, Google has temporarily blocked your free API key for making too many requests today)`);
     } finally {
       setGenerating(false);
     }
@@ -86,6 +88,7 @@ export default function Dashboard() {
 
   const coreSkills = JSON.parse(profile.core_skills || "[]");
   const skillGaps = JSON.parse(profile.skill_gaps || "[]");
+  const hasRoadmap = !!profile.saved_roadmap;
 
   return (
     <div className="min-h-screen bg-[#F7F5F2] text-[#33312E] font-sans">
@@ -165,16 +168,27 @@ export default function Dashboard() {
 
         {/* Roadmap Generator Section */}
         <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-8 border border-[#EAE4DB] mt-8 text-center">
-           <h3 className="text-2xl font-bold text-[#33312E] mb-2" style={{ fontFamily: 'Georgia, serif' }}>Close the Gap. Let AI Build Your Plan.</h3>
+           <h3 className="text-2xl font-bold text-[#33312E] mb-2" style={{ fontFamily: 'Georgia, serif' }}>
+             {hasRoadmap ? "Your Custom Action Plan is Ready" : "Close the Gap. Let AI Build Your Plan."}
+           </h3>
            <p className="text-[#6B6358] max-w-2xl mx-auto mb-6">
-             Click below to spin up the Multi-Agent System. The Strategist Agent will design a custom learning path to acquire your missing skills, and the Critic Agent will review it for quality.
+             {hasRoadmap 
+               ? "Jump back into your personalized learning path to start acquiring your missing market skills."
+               : "Click below to spin up the Multi-Agent System. The Strategist Agent will design a custom learning path to acquire your missing skills, and the Critic Agent will review it for quality."
+             }
            </p>
            <button 
              onClick={handleGenerate}
              disabled={generating}
              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-[#1E1E1E] hover:bg-black disabled:opacity-50 transition"
            >
-             {generating ? <><Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> Orchestrating Agents...</> : <><TrendingUp className="-ml-1 mr-2 h-5 w-5" /> Generate Action Plan</>}
+             {generating ? (
+               <><Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" /> Orchestrating Agents...</>
+             ) : hasRoadmap ? (
+               <><BookOpen className="-ml-1 mr-2 h-5 w-5" /> View Action Plan</>
+             ) : (
+               <><TrendingUp className="-ml-1 mr-2 h-5 w-5" /> Generate Action Plan</>
+             )}
            </button>
            
         </div>

@@ -35,21 +35,21 @@ export default function Assessment() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200">
-        <div className="px-8 py-6 border-b border-gray-200 bg-indigo-50">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center">
-            <FileText className="mr-3 text-indigo-600" />
+    <div className="min-h-screen bg-[#F7F5F2] text-[#33312E] py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto bg-white/60 backdrop-blur-md rounded-xl shadow-xl overflow-hidden border border-[#EAE4DB]">
+        <div className="px-8 py-6 border-b border-[#EAE4DB] bg-[#8A9A86]/10">
+          <h2 className="text-2xl font-bold text-[#33312E] flex items-center" style={{ fontFamily: 'Georgia, serif' }}>
+            <FileText className="mr-3 text-[#8A9A86]" />
             Resume Onboarding
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-[#6B6358]">
             Upload your resume PDF below. Our AI will analyze your skills and compare them against the live job market to generate your Career Diagnostics.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           <div>
-            <label htmlFor="resume" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="resume" className="block text-sm font-medium text-[#5C554B]">
               Upload your Resume (PDF)
             </label>
             <div className="mt-2">
@@ -58,7 +58,7 @@ export default function Assessment() {
                 accept=".pdf"
                 id="resume"
                 name="resume"
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md p-4"
+                className="shadow-sm focus:ring-[#8A9A86] focus:border-[#8A9A86] block w-full sm:text-sm border border-[#DCD3C6] rounded-md p-4 bg-white/50"
                 onChange={(e) => setResumeFile(e.target.files[0])}
                 required
               />
@@ -69,7 +69,7 @@ export default function Assessment() {
             <button
               type="submit"
               disabled={loading || success || !resumeFile}
-              className="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 transition"
+              className="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#8A9A86] hover:bg-[#73826F] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#8A9A86] disabled:opacity-50 transition"
             >
               {loading ? (
                 <>

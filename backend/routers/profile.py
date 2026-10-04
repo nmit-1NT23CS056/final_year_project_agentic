@@ -19,7 +19,6 @@ def safe_generate_content(client, model, contents):
 router = APIRouter(prefix="/api/profile", tags=["profile"])
 
 @router.get("/")
-@cache(expire=300)
 def get_profile(current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
     profile = db.query(models.CandidateProfile).filter(models.CandidateProfile.user_id == current_user_id).first()
     if not profile:
@@ -116,6 +115,7 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         profile.career_motivator = parsed_data.get('career_motivator', 'Growth')
         profile.market_demand_score = gap_data.get('market_demand_score', 50)
         profile.skill_gaps = json.dumps(gap_data.get('skill_gaps', []))
+        profile.saved_roadmap = None # Clear cached roadmap since skills changed
         
         db.commit()
         db.refresh(profile)
@@ -146,6 +146,7 @@ def update_profile(profile_data: ProfileUpdate, current_user_id: str = Depends(g
     profile.years_of_experience = profile_data.years_of_experience
     profile.core_skills = profile_data.core_skills
     profile.career_motivator = profile_data.career_motivator
+    profile.saved_roadmap = None # Clear cached roadmap since skills changed
     
     db.commit()
     db.refresh(profile)
