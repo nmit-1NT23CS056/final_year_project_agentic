@@ -47,7 +47,15 @@ def scan_for_jobs(profile_data: dict) -> list:
     response = safe_invoke_llm(llm, [SystemMessage(content="You are a Job Matcher."), HumanMessage(content=prompt)])
     
     try:
-        json_text = response.content.replace("`json", "").replace("`", "").strip()
+        text = response.content
+        if isinstance(text, list):
+            text = "".join(item.get("text", "") if isinstance(item, dict) else str(item) for item in text)
+        
+        json_text = text.replace("```json", "").replace("```", "").strip()
+        # Also clean up any lingering backticks just in case
+        if json_text.startswith("`"): 
+            json_text = json_text.strip("`")
+            
         jobs = json.loads(json_text)
         return jobs
     except Exception as e:

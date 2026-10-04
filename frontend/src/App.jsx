@@ -6,11 +6,25 @@ import Dashboard from './pages/Dashboard'
 import Jobs from './pages/Jobs'
 import Assessment from './pages/Assessment'
 import Roadmap from './pages/Roadmap'
+import Profile from './pages/Profile'
+
+import Landing from './pages/Landing'
 
 function App() {
   return (
     <Routes>
       {/* Public Routes */}
+      <Route path="/" element={
+        <>
+          <SignedIn>
+            <Navigate to="/dashboard" replace />
+          </SignedIn>
+          <SignedOut>
+            <Landing />
+          </SignedOut>
+        </>
+      } />
+      
       <Route path="/login" element={
         <SignedOut>
           <Login />
@@ -78,8 +92,22 @@ function App() {
         } 
       />
       
-      {/* Default Redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route 
+        path="/profile" 
+        element={
+          <>
+            <SignedIn>
+              <Profile />
+            </SignedIn>
+            <SignedOut>
+              <Navigate to="/login" replace />
+            </SignedOut>
+          </>
+        } 
+      />
+      
+      {/* Catch-all Redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

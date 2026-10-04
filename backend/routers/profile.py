@@ -126,3 +126,27 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to analyze profile: {str(e)}")
+
+from pydantic import BaseModel
+
+class ProfileUpdate(BaseModel):
+    current_role: str
+    years_of_experience: int
+    core_skills: str
+    career_motivator: str
+
+@router.put("/")
+def update_profile(profile_data: ProfileUpdate, current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    profile = db.query(models.CandidateProfile).filter(models.CandidateProfile.user_id == current_user_id).first()
+    if not profile:
+        profile = models.CandidateProfile(user_id=current_user_id)
+        db.add(profile)
+        
+    profile.current_role = profile_data.current_role
+    profile.years_of_experience = profile_data.years_of_experience
+    profile.core_skills = profile_data.core_skills
+    profile.career_motivator = profile_data.career_motivator
+    
+    db.commit()
+    db.refresh(profile)
+    return {"message": "Profile updated successfully", "profile": profile}
