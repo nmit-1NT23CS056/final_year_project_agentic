@@ -9,3 +9,4 @@ langchain
 langgraph
 google-genai
 tavily-python
+mem0ai==2.2.1
