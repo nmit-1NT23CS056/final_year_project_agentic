@@ -66,7 +66,7 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         
         response = safe_generate_content(
             client=client,
-            model='gemini-3.5-flash',
+            model='gemini-3.5-flash-lite',
             contents=prompt
         )
         
@@ -96,7 +96,7 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         '''
         gap_response = safe_generate_content(
             client=client,
-            model='gemini-3.5-flash',
+            model='gemini-3.5-flash-lite',
             contents=gap_prompt
         )
         
@@ -151,3 +151,6 @@ def update_profile(profile_data: ProfileUpdate, current_user_id: str = Depends(g
     db.commit()
     db.refresh(profile)
     return {"message": "Profile updated successfully", "profile": profile}
+
+
+

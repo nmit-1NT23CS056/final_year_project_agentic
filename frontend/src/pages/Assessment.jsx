@@ -48,8 +48,9 @@ export default function Assessment() {
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (error) {
       console.error(error);
-      alert('Failed to parse resume. Please check console.');
-    } finally {
+      const errMsg = error.response?.data?.detail || error.message;
+        alert('Google AI servers are heavily loaded. Please wait a moment and try again. Error: ' + errMsg);
+      } finally {
       setLoading(false);
     }
   };
@@ -127,3 +128,7 @@ export default function Assessment() {
     </div>
   );
 }
+
+
+
+

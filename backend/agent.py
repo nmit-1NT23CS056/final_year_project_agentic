@@ -20,7 +20,7 @@ class AgentState(TypedDict):
 
 def strategist_node(state: AgentState):
     print("Strategist: Drafting the initial roadmap...")
-    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", google_api_key=os.environ.get("GEMINI_API_KEY"))
     profile = state.get("profile_data", {})
     
     # Updated Profile Extraction based on new JSON
@@ -67,7 +67,7 @@ def strategist_node(state: AgentState):
 
 def critic_node(state: AgentState):
     print(f"Critic: Reviewing draft (Revision {state['revision_count']})...")
-    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", google_api_key=os.environ.get("GEMINI_API_KEY"))
     
     prompt = f'''
     You are an elite Career Coach and Critic. Review this roadmap draft.
@@ -109,3 +109,6 @@ workflow.add_edge("strategist", "critic")
 workflow.add_conditional_edges("critic", routing_function, {"end": END, "strategist": "strategist"})
 
 career_agent = workflow.compile()
+
+
+
