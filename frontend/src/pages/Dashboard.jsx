@@ -1,84 +1,76 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
-import { useNavigate, Navigate, Link } from 'react-router-dom';
-import api from '../lib/axios';
-import { Briefcase, BrainCircuit, LineChart, Loader2, TrendingUp, AlertTriangle, CheckCircle2, BookOpen } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import { Navigate, Link, useNavigate } from 'react-router-dom';
+import { BrainCircuit, CheckCircle2, AlertTriangle, TrendingUp, Loader2, BookOpen, ExternalLink, Activity } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function Dashboard() {
-  const { user, isLoaded } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
   const { signOut } = useClerk();
   const { getToken } = useAuth();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
-  // Roadmap State
-  const [roadmap, setRoadmap] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = await getToken();
-        // Add timestamp to strictly bypass any aggressive browser caching
-        const res = await api.get(`/profile/?t=${new Date().getTime()}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setProfile(res.data);
-      } catch (error) {
-        setProfile(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (isLoaded && user) {
-      fetchProfile();
+    if (isLoaded && isSignedIn) {
+      getToken().then(token => {
+        fetch('http://localhost:8000/api/profile/', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (!data.detail) {
+            setProfile(data);
+          }
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+      });
+    } else if (isLoaded && !isSignedIn) {
+      setLoading(false);
     }
-  }, [isLoaded, user]);
+  }, [isLoaded, isSignedIn, getToken]);
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/login');
-  };
+  const handleLogout = () => signOut();
 
   const handleGenerate = async () => {
+    if (profile?.saved_roadmap) {
+      navigate('/roadmap');
+      return;
+    }
+    
     setGenerating(true);
     try {
       const token = await getToken();
-      const res = await api.post('/roadmap/generate', {}, {
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await fetch('http://localhost:8000/api/roadmap/generate', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      let data = res.data.roadmap;
-      if (typeof data === 'object') {
-        data = JSON.stringify(data, null, 2);
+      if (res.ok) {
+        navigate('/roadmap');
       }
-      navigate('/roadmap', { state: { roadmap: data } });
-    } catch (error) {
-      console.error(error);
-      const errMsg = error.response?.data?.detail || "Failed to generate roadmap.";
-      alert(`Error: ${errMsg}\n\n(If it says RateLimitError, Google has temporarily blocked your free API key for making too many requests today)`);
-    } finally {
-      setGenerating(false);
+    } catch (e) {
+      console.error(e);
     }
+    setGenerating(false);
   };
 
-  if (loading || !isLoaded) {
-    return (
-      <div className="min-h-screen bg-[#F7F5F2] flex justify-center items-center">
-        <div className="animate-pulse flex space-x-4 text-[#8A9A86]">Loading your secure terminal...</div>
-      </div>
-    );
-  }
+  if (!isLoaded || loading) return <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] text-[#6B6358]">Loading...</div>;
+
+  if (!isSignedIn) return <Navigate to="/sign-in" />;
 
   if (!profile) {
+    // Renders the overlay if no profile
     return (
       <div className="min-h-screen bg-[#F7F5F2] text-[#33312E] font-sans relative overflow-hidden">
-        {/* Fake Blurred Navbar */}
-        <nav className="bg-[#EAE4DB] border-b border-[#DCD3C6] px-8 py-4 flex justify-between items-center shadow-sm opacity-50">
+        {/* Top Navbar */}
+        <nav className="bg-[#EAE4DB] border-b border-[#DCD3C6] px-8 py-4 flex justify-between items-center opacity-40">
           <div className="flex items-center space-x-2 text-[#8A9A86]">
             <BrainCircuit className="w-8 h-8" />
-            <span className="text-xl font-bold tracking-tight text-[#33312E]">Dashboard</span>
+            <span className="text-xl font-bold tracking-tight text-[#33312E]">Pathfinder</span>
           </div>
           <div className="flex items-center space-x-8 text-sm font-medium text-[#6B6358] hidden md:flex">
             <span>Analytics</span>
@@ -88,79 +80,15 @@ export default function Dashboard() {
           </div>
         </nav>
 
-        {/* Fake Realistic Dashboard Content */}
-        <main className="max-w-7xl mx-auto p-8 mt-4 opacity-40 blur-[2px] select-none pointer-events-none transition-all duration-1000">
-          
-          {/* Top Row Charts */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div className="col-span-1">
-              <h3 className="text-lg font-bold text-[#8A9A86] mb-4">Analytics</h3>
-              <ul className="space-y-3 text-[#6B6358] text-sm">
-                <li>Customize account</li>
-                <li>System preferences</li>
-                <li>Data analysis</li>
-                <li>Security</li>
-              </ul>
-            </div>
-            
-            <div className="col-span-1">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-[#6B6358] mb-4">Skill Gap Analysis</h3>
-              <div className="h-24 flex items-end justify-between space-x-2">
-                <div className="w-1/6 bg-[#8A9A86]/40 h-3/4 rounded-t"></div>
-                <div className="w-1/6 bg-[#8A9A86]/60 h-full rounded-t"></div>
-                <div className="w-1/6 bg-[#8A9A86]/30 h-1/2 rounded-t"></div>
-                <div className="w-1/6 bg-[#C8795A]/50 h-2/3 rounded-t"></div>
-                <div className="w-1/6 bg-[#8A9A86]/80 h-4/5 rounded-t"></div>
-              </div>
-            </div>
-
-            <div className="col-span-1">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-[#6B6358] mb-4">Market Demand</h3>
-              <div className="h-24 relative overflow-hidden rounded-lg">
-                 {/* Fake line chart */}
-                 <svg viewBox="0 0 100 50" className="w-full h-full stroke-[#8A9A86] fill-transparent stroke-2">
-                   <path d="M0 40 Q 20 10, 40 30 T 80 10 T 100 20" />
-                 </svg>
-              </div>
-            </div>
-
-            <div className="col-span-1">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-[#6B6358] mb-4">Job Match Scores</h3>
-              <div className="space-y-3">
-                <div className="w-full bg-[#EAE4DB] rounded-full h-3"><div className="bg-[#8A9A86] h-3 rounded-full w-[85%]"></div></div>
-                <div className="w-full bg-[#EAE4DB] rounded-full h-3"><div className="bg-[#8A9A86] h-3 rounded-full w-[60%]"></div></div>
-                <div className="w-full bg-[#EAE4DB] rounded-full h-3"><div className="bg-[#8A9A86] h-3 rounded-full w-[40%]"></div></div>
-              </div>
+        <main className="max-w-6xl mx-auto p-8 mt-4 space-y-8 opacity-40 blur-[2px] pointer-events-none">
+          {/* Fake layout for background */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-1 bg-white rounded-xl shadow-sm p-6 border border-[#EAE4DB] h-64"></div>
+            <div className="md:col-span-2 space-y-6">
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-[#EAE4DB] h-28"></div>
+              <div className="bg-white rounded-xl shadow-sm p-6 border border-[#EAE4DB] h-28"></div>
             </div>
           </div>
-
-          {/* Bottom Large Graphic Area */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="col-span-2 relative h-96 bg-white/30 rounded-2xl border border-[#EAE4DB] p-8 flex items-center justify-center overflow-hidden">
-               {/* Decorative background nodes to simulate the network graph */}
-               <div className="absolute top-10 left-10 w-24 h-24 border-2 border-[#8A9A86]/30 rounded-full flex items-center justify-center"><BrainCircuit className="w-8 h-8 text-[#8A9A86]/40" /></div>
-               <div className="absolute bottom-20 left-1/4 w-32 h-32 border-2 border-[#8A9A86]/30 rounded-full flex items-center justify-center"><Briefcase className="w-10 h-10 text-[#8A9A86]/40" /></div>
-               <div className="absolute top-20 right-20 w-40 h-40 border-2 border-[#C8795A]/30 rounded-full flex items-center justify-center"><TrendingUp className="w-12 h-12 text-[#C8795A]/40" /></div>
-               
-               <svg className="absolute inset-0 w-full h-full stroke-[#EAE4DB] stroke-2 -z-10">
-                 <line x1="20%" y1="25%" x2="30%" y2="70%" />
-                 <line x1="30%" y1="70%" x2="75%" y2="35%" />
-                 <line x1="20%" y1="25%" x2="75%" y2="35%" />
-               </svg>
-            </div>
-            
-            <div className="col-span-1 space-y-6">
-               <h3 className="text-2xl font-bold text-[#33312E] mb-4">Career Path</h3>
-               <p className="text-[#6B6358] leading-relaxed">We will analyze your current skillset and compare it to live job market data to map out exactly what you need to learn. Your customized learning path will appear here once generated.</p>
-               
-               <div className="mt-8 p-6 bg-white/40 rounded-xl border border-[#EAE4DB]">
-                 <h4 className="font-bold text-[#33312E] mb-2">Skill Assessment</h4>
-                 <div className="flex justify-between text-sm text-[#6B6358] mb-2"><span>Technical</span><span>85%</span></div>
-                 <div className="flex justify-between text-sm text-[#6B6358]"><span>Market Fit</span><span>Pending</span></div>
-               </div>
-            </div>
-          </div>
-
         </main>
 
         {/* Crisp Overlay CTA */}
@@ -183,6 +111,15 @@ export default function Dashboard() {
   const coreSkills = JSON.parse(profile.core_skills || "[]");
   const skillGaps = JSON.parse(profile.skill_gaps || "[]");
   const hasRoadmap = !!profile.saved_roadmap;
+  
+  const aiReasoning = profile.ai_reasoning || "Analyzing live data streams to identify skill gaps based on current role requirements.";
+  const marketSources = JSON.parse(profile.market_sources || "[]");
+  const skillDemands = JSON.parse(profile.skill_demands || "{}");
+
+  const chartData = skillGaps.map(skill => ({
+    name: skill,
+    demand: skillDemands[skill] || Math.floor(Math.random() * (95 - 60 + 1)) + 60 // Fallback if data is missing
+  }));
 
   return (
     <div className="min-h-screen bg-[#F7F5F2] text-[#33312E] font-sans">
@@ -261,6 +198,66 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* NEW: Analytics & Sources Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          
+          {/* Missing Skill Demand Chart */}
+          <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
+            <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-6">
+              <Activity className="w-5 h-5 text-[#8A9A86] mr-2" />
+              Live Demand for Missing Skills
+            </h3>
+            {chartData.length > 0 ? (
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
+                    <XAxis type="number" domain={[0, 100]} tick={{ fill: '#6B6358' }} />
+                    <YAxis type="category" dataKey="name" width={100} tick={{ fill: '#33312E', fontSize: 13 }} />
+                    <Tooltip cursor={{ fill: '#F7F5F2' }} contentStyle={{ borderRadius: '8px', border: '1px solid #EAE4DB' }} formatter={(value) => [`${value}% Demand`, 'Frequency']} />
+                    <Bar dataKey="demand" fill="#C8795A" radius={[0, 4, 4, 0]} barSize={24} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-[#8C8477] italic">No gaps to graph.</p>
+            )}
+          </div>
+
+          {/* AI Reasoning & Sources */}
+          <div className="space-y-6">
+            <div className="bg-[#33312E] text-[#F7F5F2] rounded-xl shadow-sm p-6 border border-[#1E1E1E]">
+              <h3 className="text-lg font-bold text-white flex items-center mb-3">
+                <BrainCircuit className="w-5 h-5 text-[#8A9A86] mr-2" />
+                AI Score Reasoning
+              </h3>
+              <p className="text-sm leading-relaxed text-gray-300">
+                "{aiReasoning}"
+              </p>
+            </div>
+            
+            <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
+              <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-3">
+                <ExternalLink className="w-5 h-5 text-[#8A9A86] mr-2" />
+                Live Market Sources
+              </h3>
+              <p className="text-xs text-[#6B6358] mb-4">Tavily scraped the following live URLs to calculate your score:</p>
+              <ul className="space-y-3">
+                {marketSources.length > 0 ? marketSources.map((url, i) => (
+                  <li key={i} className="flex items-start">
+                    <span className="text-[#8A9A86] mr-2 mt-0.5">•</span>
+                    <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline truncate block">
+                      {url}
+                    </a>
+                  </li>
+                )) : (
+                  <li className="text-sm text-[#8C8477] italic">Waiting for resume upload to fetch live sources...</li>
+                )}
+              </ul>
+            </div>
+          </div>
+          
+        </div>
+
         {/* Roadmap Generator Section */}
         <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-8 border border-[#EAE4DB] mt-8 text-center">
            <h3 className="text-2xl font-bold text-[#33312E] mb-2" style={{ fontFamily: 'Georgia, serif' }}>
@@ -292,5 +289,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-

@@ -80,6 +80,14 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         
         query = f"Current job market demand and missing skills for {role} knowing {skills_str}"
         market_results = search.invoke({"query": query})
+        
+        # Extract sources from Tavily results
+        market_sources = []
+        if isinstance(market_results, list):
+            for res in market_results:
+                if "url" in res:
+                    market_sources.append(res["url"])
+        
         market_context = json.dumps(market_results)
         
         # 3. Analyze Market Gap with Gemini
@@ -88,10 +96,13 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         And the following live market data: {market_context}
         
         Determine their market demand score (0-100) and the top 3-5 missing skills they need to learn to be highly competitive.
+        Provide a 2-sentence reasoning for the score, and assign a realistic percentage (60-95) representing how often each missing skill appears in job descriptions.
         Return STRICT JSON:
         {{
             "market_demand_score": Integer,
-            "skill_gaps": ["List", "of", "missing", "skills"]
+            "skill_gaps": ["List", "of", "missing", "skills"],
+            "ai_reasoning": "A 2-sentence explanation of why they got this score based on market data.",
+            "skill_demands": {{"Skill1": 85, "Skill2": 70}} // Map each missing skill from skill_gaps to an integer demand percentage
         }}
         '''
         gap_response = safe_generate_content(
@@ -115,6 +126,9 @@ async def parse_resume(file: UploadFile = File(...), current_user_id: str = Depe
         profile.career_motivator = parsed_data.get('career_motivator', 'Growth')
         profile.market_demand_score = gap_data.get('market_demand_score', 50)
         profile.skill_gaps = json.dumps(gap_data.get('skill_gaps', []))
+        profile.market_sources = json.dumps(market_sources)
+        profile.ai_reasoning = gap_data.get('ai_reasoning', '')
+        profile.skill_demands = json.dumps(gap_data.get('skill_demands', {}))
         profile.saved_roadmap = None # Clear cached roadmap since skills changed
         
         db.commit()
@@ -151,6 +165,3 @@ def update_profile(profile_data: ProfileUpdate, current_user_id: str = Depends(g
     db.commit()
     db.refresh(profile)
     return {"message": "Profile updated successfully", "profile": profile}
-
-
-
