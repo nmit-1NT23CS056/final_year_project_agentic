@@ -27,11 +27,9 @@ This project builds an autonomous AI-powered career advisory agent utilizing a M
 
 ## UI Showcase & Screenshots
 
-*(Note to reviewers: The frontend features a unified, dark-academia aesthetic using Earthy Minimalist color palettes)*
-
 | Dashboard & Market Analytics | Interactive Action Plan (Roadmap) | Real-Time Mock Interviewer |
 |:---:|:---:|:---:|
-| <img src="https://placehold.co/600x400/EAE4DB/33312E?text=Dashboard+Analytics" width="300"/> | <img src="https://placehold.co/600x400/EAE4DB/33312E?text=Generated+Roadmap" width="300"/> | <img src="https://placehold.co/600x400/EAE4DB/33312E?text=Token+Streaming+UI" width="300"/> |
+| <img src="assets/dashboard.png" width="300"/> | <img src="assets/roadmap.png" width="300"/> | <img src="assets/interview.png" width="300"/> |
 | *Displays Live Tavily Sources & Demand Charts* | *Multi-Agent generated Markdown with Progress Tracking* | *SSE Token Streaming with Mem0 Episodic Memory* |
 
 ---
