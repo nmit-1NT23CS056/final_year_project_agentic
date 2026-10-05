@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Mem0-000000?style=for-the-badge&logo=openai&logoColor=white" />
 </div>
 
-**Major Capstone Project | NMIT, VTU | Academic Year 2025-26**
+**Major Capstone Project | Phase 2 | NMIT, VTU | Academic Year 2025-26**
 
 **Institution:** Nitte Meenakshi Institute of Technology (NMIT)  
 **Project Guide:** DR. HONNARAJU.B, Professor, Dept. of CSE, NMIT  
@@ -25,6 +25,17 @@ This project builds an autonomous AI-powered career advisory agent utilizing a M
 
 ---
 
+## UI Showcase & Screenshots
+
+*(Note to reviewers: The frontend features a unified, dark-academia aesthetic using Earthy Minimalist color palettes)*
+
+| Dashboard & Market Analytics | Interactive Action Plan (Roadmap) | Real-Time Mock Interviewer |
+|:---:|:---:|:---:|
+| <img src="https://placehold.co/600x400/EAE4DB/33312E?text=Dashboard+Analytics" width="300"/> | <img src="https://placehold.co/600x400/EAE4DB/33312E?text=Generated+Roadmap" width="300"/> | <img src="https://placehold.co/600x400/EAE4DB/33312E?text=Token+Streaming+UI" width="300"/> |
+| *Displays Live Tavily Sources & Demand Charts* | *Multi-Agent generated Markdown with Progress Tracking* | *SSE Token Streaming with Mem0 Episodic Memory* |
+
+---
+
 ## Completed Functional Requirements (FR)
 
 | ID | Requirement | Status |
@@ -38,6 +49,16 @@ This project builds an autonomous AI-powered career advisory agent utilizing a M
 | **FR8** | Long-term episodic memory (Zep/Mem0 + Qdrant) for persistent user career tracking and proactive mentor recall | &#x2705; Complete |
 
 *(Note: FR7 was officially descoped from the final implementation).*
+
+---
+
+## AI Agent Personas
+
+This system utilizes three distinct AI Agents, each configured with highly specialized system prompts and responsibilities:
+
+1. **The Strategist Agent:** Responsible for synthesizing raw Web-RAG job market data and the user's parsed resume. It drafts an extensive, multi-step career progression roadmap using strict Markdown formatting.
+2. **The Critic Agent:** Acts as an internal quality-assurance node in the LangGraph cyclic loop. It receives the Strategist's draft and evaluates it for senior-level appropriateness, SMART goals, and formatting compliance. If it fails, it rejects the draft and forces the Strategist to rewrite it.
+3. **The Mock Interviewer Agent:** A conversational mentor equipped with Long-Term Episodic Memory (Mem0). It dynamically recalls past user weaknesses (e.g., struggling with Docker) from a local Qdrant Vector DB to personalize live interview drilling.
 
 ---
 
@@ -80,6 +101,20 @@ graph TD
     InterviewAgent --> Mem0[(Mem0 / Qdrant DB)]
     FastAPI --> SQLite[(SQLite Profile DB)]
 ```
+
+---
+
+## REST API Documentation
+
+*The backend utilizes FastAPI to automatically generate OpenAPI/Swagger documentation.*
+
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|---|
+| `POST` | `/api/profile/parse-resume` | Extracts text via `pdfplumber`, parses via Gemini, and searches Tavily for market gaps. | &#x2705; Yes (Clerk JWT) |
+| `GET` | `/api/profile/` | Retrieves the user's stored skills, gap percentages, and market demand sources. | &#x2705; Yes (Clerk JWT) |
+| `POST` | `/api/roadmap/generate` | Triggers the LangGraph Multi-Agent Engine to draft, critique, and finalize an Action Plan. | &#x2705; Yes (Clerk JWT) |
+| `POST` | `/api/jobs/scan` | Triggers the Job Agent to scrape live postings and calculate personalized match scores. | &#x2705; Yes (Clerk JWT) |
+| `POST` | `/interview/chat` | Streams LLM tokens using Server-Sent Events (SSE) and writes to Mem0 Vector storage in the background. | &#x2705; Yes (Clerk JWT) |
 
 ---
 
