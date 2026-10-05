@@ -1,4 +1,4 @@
-﻿# Intelligent Career Path Advisory Agent for Senior IT Professionals
+# Intelligent Career Path Advisory Agent for Senior IT Professionals
 
 <div align="center">
   <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
@@ -48,13 +48,24 @@ This project builds an autonomous AI-powered career advisory agent utilizing a M
 
 ---
 
-## AI Agent Personas
+## How It Works (The User Journey)
 
-This system utilizes three distinct AI Agents, each configured with highly specialized system prompts and responsibilities:
+If you were to follow a user through the system, here is how the AI orchestrates their career growth:
 
-1. **The Strategist Agent:** Responsible for synthesizing raw Web-RAG job market data and the user's parsed resume. It drafts an extensive, multi-step career progression roadmap using strict Markdown formatting.
-2. **The Critic Agent:** Acts as an internal quality-assurance node in the LangGraph cyclic loop. It receives the Strategist's draft and evaluates it for senior-level appropriateness, SMART goals, and formatting compliance. If it fails, it rejects the draft and forces the Strategist to rewrite it.
-3. **The Mock Interviewer Agent:** A conversational mentor equipped with Long-Term Episodic Memory (Mem0). It dynamically recalls past user weaknesses (e.g., struggling with Docker) from a local Qdrant Vector DB to personalize live interview drilling.
+**1. 📄 Step 1: Semantic Resume Parsing (The Foundation)**
+* The user securely logs in and uploads their PDF resume. Instead of parsing for simple keywords, our Gemini AI reads the resume semantically, understanding their exact years of experience, current role, and core verified skills.
+
+**2. 📊 Step 2: Live Market Gap Analysis (The Diagnostics)**
+* Instead of using an outdated, pre-trained database, the system triggers **Tavily (Web-RAG)** to scrape live job boards and tech articles in real-time. The AI compares the user's current skills against what companies are demanding *right now*, generating a Market Demand Score and identifying their exact "Missing Skills".
+
+**3. 🧠 Step 3: Multi-Agent Roadmap Generation (The Strategy)**
+* To acquire those missing skills, the backend spins up two AI agents working in a cyclic loop using **LangGraph**. The **Strategist Agent** writes a custom learning curriculum. The **Critic Agent** reads it, grades it, and forces the Strategist to rewrite it if the goals aren't realistic or senior-level appropriate.
+
+**4. 💼 Step 4: Autonomous Job Hunting (The Execution)**
+* While the user studies, the **Job Hunter Agent** actively scours the web for live job postings that perfectly match their new skillset, automatically generating a personalized Cover Letter for each specific listing.
+
+**5. 🎙️ Step 5: Persistent AI Mentorship (The Interview)**
+* The user enters a Mock Interview to test their knowledge. Because we built a Long-Term Memory database (**Mem0 + Qdrant**), the AI actually remembers them across sessions. If the user struggles with Kubernetes on Monday, the AI will proactively quiz them on Kubernetes when they log back in on Friday.
 
 ---
 
