@@ -46,9 +46,7 @@ This project builds an autonomous AI-powered career advisory agent utilizing a M
 | **FR4** | Real-time Web-RAG integrating live job market data (via Tavily Search API) to ground recommendations in current industry demand and render Data-Driven Dashboard Analytics | &#x2705; Complete |
 | **FR5** | Autonomous Job Hunter Agent that proactively matches live job descriptions and automatically tailors Cover Letters | &#x2705; Complete |
 | **FR6** | Interactive AI Mock Interviewer with real-time LLM Token Streaming (Server-Sent Events) | &#x2705; Complete |
-| **FR8** | Long-term episodic memory (Zep/Mem0 + Qdrant) for persistent user career tracking and proactive mentor recall | &#x2705; Complete |
-
-*(Note: FR7 was officially descoped from the final implementation).*
+| **FR7** | Long-term episodic memory (Zep/Mem0 + Qdrant) for persistent user career tracking and proactive mentor recall | &#x2705; Complete |
 
 ---
 
