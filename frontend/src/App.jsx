@@ -7,6 +7,7 @@ import Jobs from './pages/Jobs'
 import Assessment from './pages/Assessment'
 import Roadmap from './pages/Roadmap'
 import Profile from './pages/Profile'
+import Interview from './pages/Interview'
 
 import Landing from './pages/Landing'
 
@@ -98,6 +99,20 @@ function App() {
           <>
             <SignedIn>
               <Profile />
+            </SignedIn>
+            <SignedOut>
+              <Navigate to="/login" replace />
+            </SignedOut>
+          </>
+        } 
+      />
+
+      <Route 
+        path="/interview" 
+        element={
+          <>
+            <SignedIn>
+              <Interview />
             </SignedIn>
             <SignedOut>
               <Navigate to="/login" replace />

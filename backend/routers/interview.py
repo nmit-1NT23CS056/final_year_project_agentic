@@ -1,0 +1,81 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from database import get_db
+import models
+from security import get_current_user
+from pydantic import BaseModel
+from typing import List, Dict
+import json
+import os
+from fastapi.responses import StreamingResponse
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+
+router = APIRouter(prefix="/interview", tags=["interview"])
+
+class ChatRequest(BaseModel):
+    message: str
+    chat_history: List[Dict[str, str]] = []
+
+@router.post("/chat")
+async def chat_with_interviewer(request: ChatRequest, current_user_id: str = Depends(get_current_user), db: Session = Depends(get_db)):
+    profile = db.query(models.CandidateProfile).filter(models.CandidateProfile.user_id == current_user_id).first()
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found. Please upload a resume first.")
+        
+    skill_gaps = profile.skill_gaps or "[]"
+    
+    system_prompt = f"""
+    You are an elite Senior IT Technical Interviewer and Mentor.
+    You are helping the candidate practice the following skills: {skill_gaps}
+    
+    INSTRUCTIONS:
+    1. Be highly adaptable. If the user asks a general question (e.g., "What is React?"), answer it clearly like a mentor.
+    2. If the user asks you to interview them or test them, then you should start asking them technical questions (you can prioritize their missing skills, or ask general questions based on what they want).
+    3. When evaluating answers: If they are correct, praise them and ask a harder question. If they are wrong or say "I don't know", switch to "Teacher Mode" and explain the concept simply.
+    4. Keep responses conversational and concise (max 3-4 sentences). 
+    5. Only ask ONE question at a time. Do not overwhelm them.
+    """
+    
+    messages = [SystemMessage(content=system_prompt)]
+    if request.chat_history and request.chat_history[0]["role"] == "ai":
+        messages.append(HumanMessage(content="Hi, I am ready to start my interview."))
+    for msg in request.chat_history:
+        if msg["role"] == "user":
+            messages.append(HumanMessage(content=msg["content"]))
+        else:
+            messages.append(AIMessage(content=msg["content"]))
+            
+    messages.append(HumanMessage(content=request.message))
+    
+    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", api_key=os.environ.get("GEMINI_API_KEY"), temperature=0.7, max_retries=5)
+    
+    async def event_stream():
+        try:
+            async for chunk in llm.astream(messages):
+                text_val = ""
+                if isinstance(chunk.content, str):
+                    text_val = chunk.content
+                elif isinstance(chunk.content, list):
+                    for item in chunk.content:
+                        if isinstance(item, dict) and "text" in item:
+                            text_val += item["text"]
+                        elif isinstance(item, str):
+                            text_val += item
+                else:
+                    text_val = str(chunk.content)
+                if text_val:
+                    yield f"data: {json.dumps({'text': text_val})}\n\n"
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+
+
+
+
+

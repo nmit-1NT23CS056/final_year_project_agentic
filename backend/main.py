@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
-from routers import profile, roadmap, knowledge, jobs
+from routers import profile, roadmap, knowledge, jobs, interview
 from contextlib import asynccontextmanager
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -42,8 +42,10 @@ app.include_router(profile.router)
 app.include_router(roadmap.router)
 app.include_router(knowledge.router)
 app.include_router(jobs.router)
+app.include_router(interview.router)
 
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Career Advisory Agent API"}
+
 
