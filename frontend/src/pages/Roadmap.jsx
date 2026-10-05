@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useAuth, useUser } from '@clerk/clerk-react';
 import { ArrowLeft, BrainCircuit, RefreshCw, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../lib/axios';
 
 export default function Roadmap() {
@@ -11,13 +11,39 @@ export default function Roadmap() {
   const navigate = useNavigate();
   const { signOut, getToken } = useAuth();
   const { user } = useUser();
-  const [roadmapData, setRoadmapData] = useState(location.state?.roadmap);
-  const [generating, setGenerating] = useState(false);
+  const [roadmapData, setRoadmapData] = useState(location.state?.roadmap || null);
+  const [generating, setGenerating] = useState(!location.state?.roadmap);
 
-  if (!roadmapData && !generating) {
-    navigate('/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    // If roadmapData isn't passed via state, try to fetch it from the profile
+    if (!roadmapData) {
+      const fetchProfile = async () => {
+        try {
+          const token = await getToken();
+          const res = await api.get('/profile/', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (res.data?.saved_roadmap) {
+            let data = res.data.saved_roadmap;
+            if (typeof data === 'string' && data.startsWith('"') && data.endsWith('"')) {
+                // Parse double-encoded JSON if it was saved via json.dumps
+                data = JSON.parse(data);
+            }
+            setRoadmapData(data);
+          } else {
+            // No roadmap in DB, send back to dashboard
+            navigate('/dashboard');
+          }
+        } catch (error) {
+          console.error("Error fetching profile roadmap:", error);
+          navigate('/dashboard');
+        } finally {
+          setGenerating(false);
+        }
+      };
+      fetchProfile();
+    }
+  }, [roadmapData, getToken, navigate]);
 
   const handleLogout = async () => {
     await signOut();
@@ -82,8 +108,8 @@ export default function Roadmap() {
         {generating ? (
           <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-16 border border-[#EAE4DB] flex flex-col items-center justify-center min-h-[400px]">
             <Loader2 className="w-12 h-12 text-[#8A9A86] animate-spin mb-4" />
-            <h2 className="text-xl font-bold text-[#33312E]" style={{ fontFamily: 'Georgia, serif' }}>Agents are reviewing your profile...</h2>
-            <p className="text-[#6B6358] mt-2 text-center max-w-md">The Strategist is mapping a new path and the Critic is validating it. This may take a few minutes.</p>
+            <h2 className="text-xl font-bold text-[#33312E]" style={{ fontFamily: 'Georgia, serif' }}>Loading Roadmap...</h2>
+            <p className="text-[#6B6358] mt-2 text-center max-w-md">Retrieving your customized career plan from the database.</p>
           </div>
         ) : (
           <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-10 border border-[#EAE4DB]">
@@ -108,5 +134,3 @@ export default function Roadmap() {
     </div>
   );
 }
-
-
