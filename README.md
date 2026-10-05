@@ -1,4 +1,4 @@
-# Intelligent Career Path Advisory Agent for Senior IT Professionals
+ï»¿# Intelligent Career Path Advisory Agent for Senior IT Professionals
 
 <div align="center">
   <img src="https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
@@ -8,7 +8,7 @@
   <img src="https://img.shields.io/badge/Mem0-000000?style=for-the-badge&logo=openai&logoColor=white" />
 </div>
 
-**Major Capstone Project | NMIT, VTU | Academic Year 2025–26**
+**Major Capstone Project | NMIT, VTU | Academic Year 2025-26**
 
 **Institution:** Nitte Meenakshi Institute of Technology (NMIT)  
 **Project Guide:** DR. HONNARAJU.B, Professor, Dept. of CSE, NMIT  
@@ -18,30 +18,30 @@
 
 ---
 
-## ?? Problem Statement
-Existing career platforms like LinkedIn, Naukri, and Glassdoor are optimized for early-career job matching and do not address the complex advisory needs of senior IT professionals. A Senior Engineer with 5+ years of experience navigating transitions into Engineering Management, Technical Architecture, or CTO roles requires personalized, explainable guidance based on real-time market trends — not keyword-based job recommendations.
+## Problem Statement
+Existing career platforms like LinkedIn, Naukri, and Glassdoor are optimized for early-career job matching and do not address the complex advisory needs of senior IT professionals. A Senior Engineer with 5+ years of experience navigating transitions into Engineering Management, Technical Architecture, or CTO roles requires personalized, explainable guidance based on real-time market trends - not keyword-based job recommendations.
 
 This project builds an autonomous AI-powered career advisory agent utilizing a Multi-Agent architecture (Strategist and Critic loops), Web-RAG (Retrieval-Augmented Generation via live job market queries), and LLM-based reasoning to deliver highly personalized career progression roadmaps and skill gap analyses.
 
 ---
 
-## ?? Completed Functional Requirements (FR)
+## Completed Functional Requirements (FR)
 
 | ID | Requirement | Status |
 |---|---|---|
-| **FR1** | Secure, production-grade user authentication via Clerk (JWKS signature verification) | ? Complete |
-| **FR2** | PDF resume upload with NLP-based semantic parsing to auto-populate user skill profiles | ? Complete |
-| **FR3** | Multi-Agent orchestration (Strategist & Critic) using LangGraph for iterative roadmap generation and quality review | ? Complete |
-| **FR4** | Real-time Web-RAG integrating live job market data (via Tavily Search API) to ground recommendations in current industry demand and render Data-Driven Dashboard Analytics | ? Complete |
-| **FR5** | Autonomous Job Hunter Agent that proactively matches live job descriptions and automatically tailors Cover Letters | ? Complete |
-| **FR6** | Interactive AI Mock Interviewer with real-time LLM Token Streaming (Server-Sent Events) | ? Complete |
-| **FR8** | Long-term episodic memory (Zep/Mem0 + Qdrant) for persistent user career tracking and proactive mentor recall | ? Complete |
+| **FR1** | Secure, production-grade user authentication via Clerk (JWKS signature verification) | &#x2705; Complete |
+| **FR2** | PDF resume upload with NLP-based semantic parsing to auto-populate user skill profiles | &#x2705; Complete |
+| **FR3** | Multi-Agent orchestration (Strategist & Critic) using LangGraph for iterative roadmap generation and quality review | &#x2705; Complete |
+| **FR4** | Real-time Web-RAG integrating live job market data (via Tavily Search API) to ground recommendations in current industry demand and render Data-Driven Dashboard Analytics | &#x2705; Complete |
+| **FR5** | Autonomous Job Hunter Agent that proactively matches live job descriptions and automatically tailors Cover Letters | &#x2705; Complete |
+| **FR6** | Interactive AI Mock Interviewer with real-time LLM Token Streaming (Server-Sent Events) | &#x2705; Complete |
+| **FR8** | Long-term episodic memory (Zep/Mem0 + Qdrant) for persistent user career tracking and proactive mentor recall | &#x2705; Complete |
 
 *(Note: FR7 was officially descoped from the final implementation).*
 
 ---
 
-## ??? System Architecture
+## System Architecture
 
 The application runs on a strictly decoupled React Frontend and FastAPI Backend architecture, communicating securely via standard REST conventions and JWKS signature verification.
 
@@ -83,7 +83,7 @@ graph TD
 
 ---
 
-## ?? Setup Instructions
+## Setup Instructions
 
 ### Prerequisites
 - Python 3.10+
@@ -134,7 +134,7 @@ npm run dev
 
 ---
 
-## ?? Technical Highlights & Design Decisions
+## Technical Highlights & Design Decisions
 
 - **Multi-Agent Orchestration (LangGraph):** We shifted from a monolithic prompt architecture to a state-machine workflow. The Strategist drafts the plan based on live data, while the Critic forces revisions if the quality isn't high enough.
 - **Fault Tolerance:** Built with `tenacity` exponential backoff to handle external API rate limits (HTTP 429) gracefully without crashing.
