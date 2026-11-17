@@ -10,6 +10,7 @@ import json
 
 class GenerateRequest(BaseModel):
     force_regenerate: bool = False
+    human_feedback: str = ""
 
 router = APIRouter(prefix="/api/roadmap", tags=["roadmap"])
 
@@ -23,28 +24,43 @@ def generate_roadmap(request: GenerateRequest = None, current_user_id: str = Dep
     if not profile:
         raise HTTPException(status_code=400, detail="Profile not found. Please complete the assessment first.")
         
-    # 2. Check Cache
-    if profile.saved_roadmap and not request.force_regenerate:
+    # 2. Check Cache (if human_feedback is passed, always force regenerate)
+    should_regenerate = request.force_regenerate or bool(request.human_feedback.strip())
+    if profile.saved_roadmap and not should_regenerate:
         print("Returning cached roadmap from database.")
         try:
-            return {"roadmap": json.loads(profile.saved_roadmap)}
+            return {
+                "roadmap": json.loads(profile.saved_roadmap),
+                "adaptive_duration": profile.adaptive_duration or ""
+            }
         except json.JSONDecodeError:
-            pass # If it fails to parse, just regenerate
+            pass # If it fails to parse, regenerate
             
-    # 3. Convert to dictionary to pass into our LangGraph State
+    # 3. Convert to comprehensive dictionary to pass into our LangGraph State
     profile_dict = {
         "current_role": profile.current_role,
+        "target_role": profile.target_role or profile.current_role,
+        "persona": profile.persona or "student",
+        "available_hours_per_week": profile.available_hours_per_week or 15,
         "years_of_experience": profile.years_of_experience,
         "core_skills": profile.core_skills,
         "skill_gaps": profile.skill_gaps,
         "career_motivator": profile.career_motivator,
-        "market_demand_score": profile.market_demand_score
+        "market_demand_score": profile.market_demand_score,
+        "github_link": profile.github_link or "",
+        "online_courses": profile.online_courses or "[]",
+        "human_goal": profile.human_goal or ""
     }
     
     initial_state = {
         "user_id": current_user_id,
         "profile_data": profile_dict,
-        "revision_count": 0
+        "revision_count": 0,
+        "draft_roadmap": "",
+        "critic_feedback": "",
+        "final_roadmap": "",
+        "human_feedback": request.human_feedback.strip(),
+        "calculated_timeline": ""
     }
     
     # 4. Trigger the Multi-Agent System!
@@ -54,13 +70,18 @@ def generate_roadmap(request: GenerateRequest = None, current_user_id: str = Dep
         print("LangGraph execution finished successfully!")
         
         final_roadmap = final_state.get("final_roadmap", "Failed to generate roadmap.")
+        calculated_timeline = final_state.get("calculated_timeline", "")
         
-        # 5. Save the generated roadmap back to the database
+        # 5. Save the generated roadmap and adaptive duration back to the database
         profile.saved_roadmap = json.dumps(final_roadmap)
+        profile.adaptive_duration = calculated_timeline
         db.commit()
         
         # Return the roadmap drafted by the Strategist and approved by the Critic
-        return {"roadmap": final_roadmap}
+        return {
+            "roadmap": final_roadmap,
+            "adaptive_duration": calculated_timeline
+        }
     except Exception as e:
         print(f"Error in LangGraph: {str(e)}")
         raise HTTPException(status_code=500, detail=f"AI Engine Error: {str(e)}")

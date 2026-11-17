@@ -1,6 +1,15 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_community.tools.tavily_search import TavilySearchResults
+try:
+    from langchain_community.tools.tavily_search import TavilySearchResults
+    def perform_tavily_search(query: str, api_key: str, max_results: int = 5):
+        return TavilySearchResults(max_results=max_results, tavily_api_key=api_key).invoke({"query": query})
+except ImportError:
+    from tavily import TavilyClient
+    def perform_tavily_search(query: str, api_key: str, max_results: int = 5):
+        client = TavilyClient(api_key=api_key)
+        res = client.search(query=query, max_results=max_results)
+        return res.get("results", [])
 import os
 import json
 from tenacity import retry, wait_exponential, stop_after_attempt
@@ -17,9 +26,8 @@ def scan_for_jobs(profile_data: dict) -> list:
     skills = profile_data.get("core_skills", "[]")
     
     # 1. Search the web for live jobs
-    search = TavilySearchResults(max_results=5, tavily_api_key=os.environ.get("TAVILY_API_KEY"))
     query = f"recent remote jobs hiring for {role} requiring {skills}"
-    search_results = search.invoke({"query": query})
+    search_results = perform_tavily_search(query=query, api_key=os.environ.get("TAVILY_API_KEY"), max_results=5)
     
     # 2. Let Gemini filter and rank the jobs, then write cover letters
     llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", google_api_key=os.environ.get("GEMINI_API_KEY"))

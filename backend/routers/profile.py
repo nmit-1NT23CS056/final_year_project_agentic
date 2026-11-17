@@ -8,8 +8,16 @@ import json
 import io
 import pdfplumber
 from google import genai
-from fastapi_cache.decorator import cache
-from langchain_community.tools.tavily_search import TavilySearchResults
+try:
+    from langchain_community.tools.tavily_search import TavilySearchResults
+    def perform_tavily_search(query: str, api_key: str, max_results: int = 3):
+        return TavilySearchResults(max_results=max_results, tavily_api_key=api_key).invoke({"query": query})
+except ImportError:
+    from tavily import TavilyClient
+    def perform_tavily_search(query: str, api_key: str, max_results: int = 3):
+        client = TavilyClient(api_key=api_key)
+        res = client.search(query=query, max_results=max_results)
+        return res.get("results", [])
 from tenacity import retry, wait_exponential, stop_after_attempt
 
 @retry(wait=wait_exponential(multiplier=1, min=4, max=30), stop=stop_after_attempt(5))
@@ -90,9 +98,8 @@ async def parse_resume(
         effective_target = target_role.strip() if target_role and target_role.strip() else extracted_role
         skills_str = ", ".join(parsed_data.get('core_skills', []))
         
-        search = TavilySearchResults(max_results=3, tavily_api_key=tavily_key)
         query = f"Current job market demand, required skills, and missing skills for {effective_target} knowing {skills_str}"
-        market_results = search.invoke({"query": query})
+        market_results = perform_tavily_search(query=query, api_key=tavily_key, max_results=3)
         
         # Extract sources from Tavily results
         market_sources = []

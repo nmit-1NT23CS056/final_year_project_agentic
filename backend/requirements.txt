@@ -6,7 +6,10 @@ pyjwt
 pydantic
 python-dotenv
 langchain
+langchain-community
 langgraph
 google-genai
 tavily-python
 mem0ai==2.2.1
+python-multipart
+jinja2
