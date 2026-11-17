@@ -16,7 +16,12 @@ import {
   Briefcase,
   Clock,
   Award,
-  GitBranch
+  GitBranch,
+  Layers,
+  Cpu,
+  Cloud,
+  Wrench,
+  Code2
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -41,6 +46,7 @@ export default function Dashboard() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [skillTab, setSkillTab] = useState('All');
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
@@ -180,6 +186,68 @@ export default function Dashboard() {
     demand: skillDemands[skill] || Math.floor(Math.random() * (95 - 60 + 1)) + 60 // Fallback if data is missing
   }));
 
+  // Automatic Domain Clustering for Verified Skills
+  const categorizedSkills = {
+    "Languages & CS": [],
+    "Full-Stack & Web": [],
+    "AI & Data": [],
+    "Cloud & DevOps": [],
+    "Developer Tooling": []
+  };
+
+  const skillRules = [
+    { cat: "Languages & CS", match: /^(c\+\+|c|python|java|javascript|typescript|c#|go|rust|ruby|swift|kotlin|php|data structures.*|algorithms|dsa|oop|dbms|operating systems|computer networks)$/i },
+    { cat: "AI & Data", match: /^(langgraph|langchain|rag|nlp|gemini.*|openai.*|pytorch|tensorflow|keras|pandas|numpy|scikit.*|machine learning|deep learning|huggingface|vector.*|chroma.*|qdrant.*|llm.*)$/i },
+    { cat: "Cloud & DevOps", match: /^(aws|gcp|azure|docker|kubernetes|ci\/cd.*|github actions|terraform|linux|nginx|vercel|render|cloudinary|firebase|supabase)$/i },
+    { cat: "Full-Stack & Web", match: /^(react|next\.js|vue|angular|redux.*|tailwind.*|html|css|node\.js|node|express.*|rest.*|graphql|fastapi|flask|django|mongodb|mysql|postgresql|postgres|sqlite|redis|sql|prisma)$/i },
+  ];
+
+  coreSkills.forEach(skill => {
+    let placed = false;
+    for (const r of skillRules) {
+      if (r.match.test(skill.trim())) {
+        categorizedSkills[r.cat].push(skill);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      if (/git|github|vscode|vs code|postman|jira|bitbucket|npm|yarn|vite|webpack/i.test(skill)) {
+        categorizedSkills["Developer Tooling"].push(skill);
+      } else {
+        categorizedSkills["Full-Stack & Web"].push(skill);
+      }
+    }
+  });
+
+  const domainIcons = {
+    "Languages & CS": <Code2 className="h-3.5 w-3.5 mr-1" />,
+    "Full-Stack & Web": <Layers className="h-3.5 w-3.5 mr-1" />,
+    "AI & Data": <Cpu className="h-3.5 w-3.5 mr-1" />,
+    "Cloud & DevOps": <Cloud className="h-3.5 w-3.5 mr-1" />,
+    "Developer Tooling": <Wrench className="h-3.5 w-3.5 mr-1" />
+  };
+
+  const getGapContext = (gap) => {
+    const l = gap.toLowerCase();
+    if (l.includes("typescript")) {
+      return { domain: "Full-Stack Typing", reason: "Standard for type safety in modern enterprise React & Node codebases." };
+    }
+    if (l.includes("test") || l.includes("jest") || l.includes("pytest")) {
+      return { domain: "Code Reliability", reason: "Automated regression testing required for production quality." };
+    }
+    if (l.includes("system design") || l.includes("architecture")) {
+      return { domain: "System Architecture", reason: "Key benchmark for high-concurrency APIs, microservices, and scaling." };
+    }
+    if (l.includes("ci/cd") || l.includes("docker") || l.includes("kubernetes") || l.includes("pipeline")) {
+      return { domain: "DevOps & CI/CD", reason: "Automates testing, container packaging, and cloud delivery pipelines." };
+    }
+    if (l.includes("graphql")) {
+      return { domain: "API Architecture", reason: "Prevents over-fetching and powers modern flexible API queries." };
+    }
+    return { domain: "Target Competency", reason: `High-frequency skill in live postings for ${profile.target_role || profile.current_role}.` };
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F5F2] text-[#33312E] font-sans">
       {/* Top Navbar */}
@@ -251,34 +319,140 @@ export default function Dashboard() {
 
           {/* Right Column: Skills & Gaps */}
           <div className="md:col-span-2 space-y-6">
+            
+            {/* 1. Categorized Verified Skills with Domain Filter Tabs */}
             <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
-              <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-4">
-                <CheckCircle2 className="w-5 h-5 text-[#8A9A86] mr-2" />
-                Verified Skills
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {coreSkills.length > 0 ? coreSkills.map(skill => (
-                  <span key={skill} className="px-3 py-1 bg-[#8A9A86]/10 text-[#73826F] text-sm font-medium rounded-full border border-[#8A9A86]/20">
-                    {skill}
-                  </span>
-                )) : <span className="text-[#8C8477] italic">No skills extracted.</span>}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                <h3 className="text-lg font-bold text-[#33312E] flex items-center">
+                  <CheckCircle2 className="w-5 h-5 text-[#8A9A86] mr-2" />
+                  Verified Engineering Portfolio
+                </h3>
+                <span className="text-xs font-semibold px-2.5 py-1 bg-[#8A9A86]/20 text-[#33312E] rounded-full self-start sm:self-auto">
+                  {coreSkills.length} Verified Proficiencies
+                </span>
               </div>
+
+              {/* Domain Filter Tabs */}
+              <div className="flex flex-wrap gap-1.5 p-1 bg-[#EAE4DB]/50 rounded-lg mb-4 border border-[#DCD3C6]">
+                <button
+                  type="button"
+                  onClick={() => setSkillTab('All')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-md transition ${
+                    skillTab === 'All'
+                      ? 'bg-white text-[#33312E] shadow-sm'
+                      : 'text-[#6B6358] hover:text-[#33312E]'
+                  }`}
+                >
+                  All ({coreSkills.length})
+                </button>
+                {Object.entries(categorizedSkills).map(([catName, list]) => {
+                  if (list.length === 0) return null;
+                  return (
+                    <button
+                      key={catName}
+                      type="button"
+                      onClick={() => setSkillTab(catName)}
+                      className={`px-2.5 py-1 text-xs font-semibold rounded-md flex items-center transition ${
+                        skillTab === catName
+                          ? 'bg-white text-[#33312E] shadow-sm'
+                          : 'text-[#6B6358] hover:text-[#33312E]'
+                      }`}
+                    >
+                      {domainIcons[catName]}
+                      {catName} ({list.length})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Skills Display */}
+              {skillTab === 'All' ? (
+                <div className="space-y-3.5">
+                  {Object.entries(categorizedSkills).map(([catName, list]) => {
+                    if (list.length === 0) return null;
+                    return (
+                      <div key={catName} className="p-3 bg-white/50 rounded-lg border border-[#EAE4DB]/70">
+                        <div className="flex items-center text-xs font-bold text-[#6B6358] uppercase tracking-wider mb-2">
+                          {domainIcons[catName]}
+                          {catName}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {list.map(skill => (
+                            <span key={skill} className="px-2.5 py-1 bg-white text-[#33312E] text-xs font-medium rounded-md border border-[#EAE4DB] shadow-xs hover:border-[#8A9A86] transition">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-4 bg-white/70 rounded-lg border border-[#EAE4DB]">
+                  <div className="flex items-center text-xs font-bold text-[#73826F] uppercase tracking-wider mb-3">
+                    {domainIcons[skillTab]}
+                    {skillTab} Focus Domain
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {categorizedSkills[skillTab]?.map(skill => (
+                      <span key={skill} className="px-3 py-1 bg-[#8A9A86]/10 text-[#33312E] text-xs font-semibold rounded-md border border-[#8A9A86]/30 shadow-xs">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
+            {/* 2. Strategic Missing Skills with Context & Demand Cards */}
             <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
-              <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-4">
-                <AlertTriangle className="w-5 h-5 text-[#C8795A] mr-2" />
-                Missing Market Skills (Gaps)
-              </h3>
-              <p className="text-sm text-[#6B6358] mb-4">The AI analyzed live job postings for {profile.current_role}s and found you are missing these highly requested skills:</p>
-              <div className="flex flex-wrap gap-2">
-                {skillGaps.length > 0 ? skillGaps.map(gap => (
-                  <span key={gap} className="px-3 py-1 bg-[#C8795A]/10 text-[#C8795A] text-sm font-medium rounded-full border border-[#C8795A]/20">
-                    {gap}
-                  </span>
-                )) : <span className="text-[#8C8477] italic">No gaps identified. You're perfect!</span>}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-2">
+                <h3 className="text-lg font-bold text-[#33312E] flex items-center">
+                  <AlertTriangle className="w-5 h-5 text-[#C8795A] mr-2" />
+                  Strategic Market Gaps ({profile.target_role || profile.current_role})
+                </h3>
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#C8795A]/15 text-[#C8795A] self-start sm:self-auto">
+                  {skillGaps.length} Target Objectives
+                </span>
               </div>
+              <p className="text-xs text-[#6B6358] mb-4">
+                The AI benchmarked your profile against live postings and identified these high-frequency gaps:
+              </p>
+
+              {skillGaps.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {skillGaps.map(gap => {
+                    const ctx = getGapContext(gap);
+                    const demandVal = skillDemands[gap] || 80;
+                    return (
+                      <div key={gap} className="p-3.5 bg-white rounded-lg border border-[#EAE4DB] hover:border-[#C8795A]/50 transition shadow-xs flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <h4 className="text-sm font-bold text-[#33312E]">{gap}</h4>
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-[#C8795A]/15 text-[#C8795A] whitespace-nowrap">
+                              {demandVal}% Demand
+                            </span>
+                          </div>
+                          <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-[#73826F] bg-[#8A9A86]/10 px-2 py-0.5 rounded mb-2">
+                            {ctx.domain}
+                          </span>
+                          <p className="text-xs text-[#6B6358] leading-relaxed">
+                            {ctx.reason}
+                          </p>
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-[#EAE4DB]/60 flex items-center justify-between text-[11px] text-[#8A9A86] font-medium">
+                          <span>⚡ Targeted in Roadmap</span>
+                          <span className="font-bold">→</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-[#8C8477] italic py-4">No gaps identified. Candidate fully aligns with target role.</p>
+              )}
             </div>
+
           </div>
         </div>
 
