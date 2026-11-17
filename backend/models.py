@@ -18,6 +18,17 @@ class CandidateProfile(Base):
     ai_reasoning = Column(Text, default="")
     skill_demands = Column(Text, default="[]") # JSON string mapping skill to demand %
 
+    # Adaptive Profile & Evaluation Fields
+    persona = Column(String, default="student") # "student" or "professional"
+    target_role = Column(String, default="")
+    available_hours_per_week = Column(Integer, default=15)
+    github_link = Column(String, default="")
+    online_courses = Column(Text, default="[]") # JSON string of [{course_name, completion_percentage}]
+    human_goal = Column(Text, default="")
+    domain_marks = Column(Text, default="{}") # JSON string mapping domains to marks scored & max marks
+    adaptive_duration = Column(String, default="") # e.g. "2 Weeks Sprint"
+    topic_dependencies = Column(Text, default="[]") # JSON string of DAG dependencies
+
 class JobMatch(Base):
     __tablename__ = "job_matches"
 
