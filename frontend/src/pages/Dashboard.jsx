@@ -15,7 +15,8 @@ import {
   GraduationCap,
   Briefcase,
   Clock,
-  Award
+  Award,
+  GitBranch
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -236,6 +237,14 @@ export default function Dashboard() {
                   <span className="absolute text-2xl font-bold text-[#33312E]">{profile.market_demand_score}</span>
                 </div>
                 <p className="mt-2 text-xs text-[#6B6358]">Aggregated 100-mark rubric</p>
+                {profile.github_link && (
+                  <div className="mt-4 pt-3 border-t border-[#EAE4DB] flex items-center justify-center text-xs text-[#6B6358]">
+                    <GitBranch className="h-3.5 w-3.5 mr-1 text-[#8A9A86]" />
+                    <a href={profile.github_link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate max-w-[180px]">
+                      Audited GitHub Repos
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </div>

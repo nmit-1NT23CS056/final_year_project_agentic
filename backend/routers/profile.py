@@ -6,8 +6,72 @@ from security import get_current_user
 import os
 import json
 import io
+import re
+import urllib.request
 import pdfplumber
 from google import genai
+
+def audit_github_profile(github_input: str) -> dict:
+    """
+    Directly queries the official GitHub REST API to audit a candidate's real public activity,
+    extracting top repositories, programming languages used, and star counts.
+    """
+    if not github_input or not github_input.strip():
+        return {"verified": False, "reason": "No GitHub link provided by candidate"}
+        
+    try:
+        raw = github_input.strip().rstrip("/")
+        match = re.search(r"github\.com/([a-zA-Z0-9_-]+)", raw)
+        username = match.group(1) if match else raw.split("/")[-1]
+        
+        if not username:
+            return {"verified": False, "reason": "Invalid GitHub profile URL"}
+            
+        url = f"https://api.github.com/users/{username}/repos?sort=updated&per_page=6"
+        req = urllib.request.Request(
+            url, 
+            headers={"User-Agent": "Career-Advisory-Agent", "Accept": "application/vnd.github.v3+json"}
+        )
+        
+        with urllib.request.urlopen(req, timeout=5) as response:
+            repos_data = json.loads(response.read().decode())
+            
+        if not isinstance(repos_data, list) or len(repos_data) == 0:
+            return {
+                "verified": True, 
+                "username": username, 
+                "repo_count": 0, 
+                "reason": "Profile exists but has 0 public repositories"
+            }
+            
+        top_repos = []
+        languages = set()
+        total_stars = 0
+        
+        for r in repos_data:
+            lang = r.get("language")
+            if lang:
+                languages.add(lang)
+            stars = r.get("stargazers_count", 0)
+            total_stars += stars
+            top_repos.append({
+                "name": r.get("name"),
+                "language": lang or "Unspecified",
+                "stars": stars,
+                "description": (r.get("description") or "No description provided")[:120]
+            })
+            
+        return {
+            "verified": True,
+            "username": username,
+            "repo_count": len(top_repos),
+            "top_repos": top_repos[:5],
+            "detected_languages": list(languages),
+            "total_stars": total_stars
+        }
+    except Exception as e:
+        print(f"Notice: GitHub live audit skipped: {e}")
+        return {"verified": False, "reason": f"GitHub live query error: {str(e)}"}
 try:
     from langchain_community.tools.tavily_search import TavilySearchResults
     def perform_tavily_search(query: str, api_key: str, max_results: int = 3):
@@ -110,7 +174,10 @@ async def parse_resume(
         
         market_context = json.dumps(market_results)
         
-        # 3. Analyze Market Gap & Calculate 100-Mark Rubric with Gemini
+        # 3. Live GitHub Public API Audit
+        github_audit = audit_github_profile(github_link)
+        
+        # 4. Analyze Market Gap & Calculate 100-Mark Rubric with Gemini
         gap_prompt = f'''
         You are an elite Senior IT Technical Hiring Bar Raiser and Academic Project Evaluator.
         Candidate Evaluation Data:
@@ -119,8 +186,8 @@ async def parse_resume(
         - Target Desired Role: {effective_target}
         - Verified Skills: {skills_str}
         - Resume Projects Summary: {parsed_data.get("projects_summary", "None listed")}
-        - GitHub Profile: {github_link if github_link else "Not provided"}
-        - Online Courses Completed: {online_courses}
+        - LIVE GITHUB AUDIT (Scraped from GitHub REST API): {json.dumps(github_audit)}
+        - Online Courses & Certifications (NPTEL/Coursera): {online_courses}
         - Specific Candidate Goal: {human_goal if human_goal else "General upskilling"}
         - Live Job Market Data: {market_context}
         
@@ -130,12 +197,15 @@ async def parse_resume(
            - "Languages & Core CS" (Max: 20 marks)
            - "Target Domain Alignment" (Max: 30 marks)
            - "Cloud, DevOps & Systems" (Max: 20 marks)
-           - "Projects & Practical Proof" (Max: 15 marks)
-           - "Courses & Certifications" (Max: 15 marks)
+           - "Projects & Practical Proof" (Max: 15 marks):
+             * Strictly grade using the LIVE GITHUB AUDIT. If the user has verified public repositories matching their tech stack, award high marks (12-15).
+             * If GitHub audit failed, has 0 public repositories, or is missing, penalize appropriately (down to 4-8 marks) and state this in the reasoning.
+           - "Courses & Certifications" (Max: 15 marks):
+             * Grade based on reported online courses (NPTEL, Coursera, etc.) and completion percentage.
            (The sum of these 5 domain scores is their exact market_demand_score out of 100).
         3. Identify the top 3-5 critical missing skills they need to learn for {effective_target}.
         4. Assign a realistic demand percentage (60-95) for each missing skill based on live market demand.
-        5. Provide a 2-sentence executive reasoning for the score.
+        5. Provide a 2-sentence executive reasoning for the score explicitly mentioning what GitHub/project evidence was found.
         
         Return STRICT JSON (NO MARKDOWN):
         {{
