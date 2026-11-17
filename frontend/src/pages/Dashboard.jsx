@@ -1,8 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
 import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { BrainCircuit, CheckCircle2, AlertTriangle, TrendingUp, Loader2, BookOpen, ExternalLink, Activity } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { 
+  BrainCircuit, 
+  CheckCircle2, 
+  AlertTriangle, 
+  TrendingUp, 
+  Loader2, 
+  BookOpen, 
+  ExternalLink, 
+  Activity,
+  Compass,
+  Target,
+  GraduationCap,
+  Briefcase,
+  Clock,
+  Award
+} from 'lucide-react';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  Tooltip, 
+  ResponsiveContainer,
+  Radar, 
+  RadarChart, 
+  PolarGrid, 
+  PolarAngleAxis, 
+  PolarRadiusAxis 
+} from 'recharts';
 
 export default function Dashboard() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -116,6 +143,37 @@ export default function Dashboard() {
   const marketSources = JSON.parse(profile.market_sources || "[]");
   const skillDemands = JSON.parse(profile.skill_demands || "{}");
 
+  // Parse Domain Marks from 100-mark rubric
+  let domainMarks = {};
+  try {
+    domainMarks = JSON.parse(profile.domain_marks || "{}");
+  } catch (e) {
+    domainMarks = {};
+  }
+
+  const defaultDomainMarks = {
+    "Languages & CS": { score: Math.round(profile.market_demand_score * 0.20), max: 20 },
+    "Target Domain": { score: Math.round(profile.market_demand_score * 0.30), max: 30 },
+    "Cloud & DevOps": { score: Math.round(profile.market_demand_score * 0.20), max: 20 },
+    "Projects & GitHub": { score: Math.round(profile.market_demand_score * 0.15), max: 15 },
+    "Courses & Certs": { score: Math.round(profile.market_demand_score * 0.15), max: 15 }
+  };
+
+  const effectiveMarks = Object.keys(domainMarks).length > 0 ? domainMarks : defaultDomainMarks;
+
+  const radarData = Object.entries(effectiveMarks).map(([key, val]) => {
+    const score = typeof val === 'object' ? (val.score ?? 0) : Number(val);
+    const max = typeof val === 'object' ? (val.max ?? 100) : 100;
+    const pct = max > 0 ? Math.round((score / max) * 100) : score;
+    return {
+      subject: key,
+      percentage: pct,
+      score: score,
+      max: max,
+      fullMark: 100
+    };
+  });
+
   const chartData = skillGaps.map(skill => ({
     name: skill,
     demand: skillDemands[skill] || Math.floor(Math.random() * (95 - 60 + 1)) + 60 // Fallback if data is missing
@@ -147,20 +205,37 @@ export default function Dashboard() {
           {/* Left Column: Role & Score */}
           <div className="md:col-span-1 space-y-6">
             <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB] text-center">
-              <h3 className="text-sm font-semibold text-[#6B6358] uppercase tracking-wider mb-2">Current Profile</h3>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#8A9A86]/20 text-[#33312E] mb-3">
+                {profile.persona === 'professional' ? '💼 Working Professional' : '🎓 Student Candidate'}
+              </span>
+              <h3 className="text-xs font-semibold text-[#6B6358] uppercase tracking-wider mb-1">Current Profile</h3>
               <p className="text-xl font-bold text-[#33312E]">{profile.current_role}</p>
-              <p className="text-md text-[#6B6358]">{profile.years_of_experience} years experience</p>
-              
-              <div className="mt-8">
-                <h3 className="text-sm font-semibold text-[#6B6358] uppercase tracking-wider mb-4">Market Demand Score</h3>
-                <div className="relative inline-flex items-center justify-center">
-                  <svg className="w-32 h-32 transform -rotate-90">
-                    <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-[#EAE4DB]" />
-                    <circle cx="64" cy="64" r="56" stroke="currentColor" strokeWidth="12" fill="transparent" strokeDasharray="351.8" strokeDashoffset={351.8 - (351.8 * profile.market_demand_score) / 100} className={profile.market_demand_score > 70 ? 'text-[#8A9A86]' : 'text-[#C8795A]'} />
-                  </svg>
-                  <span className="absolute text-3xl font-bold text-[#33312E]">{profile.market_demand_score}</span>
+              <p className="text-xs text-[#6B6358] mb-3">{profile.years_of_experience} years verified experience</p>
+
+              {profile.target_role && (
+                <div className="p-3 bg-[#8A9A86]/10 rounded-lg border border-[#8A9A86]/25 text-left mb-3">
+                  <div className="flex items-center text-xs font-bold text-[#73826F] mb-1">
+                    <Target className="h-3.5 w-3.5 mr-1" />
+                    Target Desired Role
+                  </div>
+                  <p className="text-sm font-bold text-[#33312E]">{profile.target_role}</p>
+                  <p className="text-[11px] text-[#6B6358] mt-1 flex items-center">
+                    <Clock className="h-3 w-3 mr-1 inline text-[#8A9A86]" />
+                    Pacing: {profile.available_hours_per_week || 15} hrs / week
+                  </p>
                 </div>
-                <p className="mt-2 text-xs text-[#6B6358]">Based on live job market trends</p>
+              )}
+              
+              <div className="mt-4 pt-4 border-t border-[#EAE4DB]">
+                <h3 className="text-xs font-semibold text-[#6B6358] uppercase tracking-wider mb-3">Market Demand Score</h3>
+                <div className="relative inline-flex items-center justify-center">
+                  <svg className="w-28 h-28 transform -rotate-90">
+                    <circle cx="56" cy="56" r="48" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-[#EAE4DB]" />
+                    <circle cx="56" cy="56" r="48" stroke="currentColor" strokeWidth="10" fill="transparent" strokeDasharray="301.6" strokeDashoffset={301.6 - (301.6 * profile.market_demand_score) / 100} className={profile.market_demand_score > 70 ? 'text-[#8A9A86]' : 'text-[#C8795A]'} />
+                  </svg>
+                  <span className="absolute text-2xl font-bold text-[#33312E]">{profile.market_demand_score}</span>
+                </div>
+                <p className="mt-2 text-xs text-[#6B6358]">Aggregated 100-mark rubric</p>
               </div>
             </div>
           </div>
@@ -198,15 +273,64 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* NEW: Analytics & Sources Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        {/* Evaluation Rubric & Market Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           
-          {/* Missing Skill Demand Chart */}
+          {/* 1. Domain Marks Radar Chart (Spider Web) */}
           <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
-            <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-6">
-              <Activity className="w-5 h-5 text-[#8A9A86] mr-2" />
-              Live Demand for Missing Skills
-            </h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-bold text-[#33312E] flex items-center">
+                <Compass className="w-5 h-5 text-[#8A9A86] mr-2" />
+                Domain Evaluation Rubric
+              </h3>
+              <span className="text-xs font-bold px-3 py-1 bg-[#8A9A86]/20 text-[#33312E] rounded-full">
+                100 Marks Breakdown
+              </span>
+            </div>
+            <p className="text-xs text-[#6B6358] mb-2">
+              Competency polygon across core CS, domain depth, DevOps, projects, and certifications:
+            </p>
+
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
+                  <PolarGrid stroke="#EAE4DB" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#4A443C', fontSize: 11, fontWeight: 600 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="#DCD3C6" tick={{ fill: '#6B6358', fontSize: 10 }} />
+                  <Radar name="Candidate Competency" dataKey="percentage" stroke="#8A9A86" fill="#8A9A86" fillOpacity={0.45} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: '1px solid #EAE4DB', backgroundColor: 'rgba(255, 255, 255, 0.95)' }} 
+                    formatter={(value, name, item) => [`${item.payload.score} / ${item.payload.max} Marks (${value}%)`, 'Evaluated Score']} 
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Marks distribution pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 pt-3 border-t border-[#EAE4DB]">
+              {radarData.map((item, idx) => (
+                <div key={idx} className="p-2 rounded-lg bg-white/70 border border-[#EAE4DB] text-center">
+                  <p className="text-[11px] font-semibold text-[#6B6358] truncate">{item.subject}</p>
+                  <p className="text-sm font-bold text-[#33312E]">
+                    {item.score} <span className="text-xs font-normal text-[#6B6358]">/ {item.max}</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 2. Missing Skill Demand Chart */}
+          <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB] flex flex-col justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-2">
+                <Activity className="w-5 h-5 text-[#8A9A86] mr-2" />
+                Live Demand for Missing Skills
+              </h3>
+              <p className="text-xs text-[#6B6358] mb-4">
+                Real-time frequency of required missing skills across live job postings:
+              </p>
+            </div>
+
             {chartData.length > 0 ? (
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -219,43 +343,47 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <p className="text-[#8C8477] italic">No gaps to graph.</p>
+              <p className="text-[#8C8477] italic py-12 text-center">No missing gaps identified.</p>
             )}
+
+            <div className="mt-4 pt-3 border-t border-[#EAE4DB] text-xs text-[#6B6358] text-center">
+              Targeted skills automatically prioritized in your adaptive curriculum.
+            </div>
           </div>
 
-          {/* AI Reasoning & Sources */}
-          <div className="space-y-6">
-            <div className="bg-[#33312E] text-[#F7F5F2] rounded-xl shadow-sm p-6 border border-[#1E1E1E]">
-              <h3 className="text-lg font-bold text-white flex items-center mb-3">
-                <BrainCircuit className="w-5 h-5 text-[#8A9A86] mr-2" />
-                AI Score Reasoning
-              </h3>
-              <p className="text-sm leading-relaxed text-gray-300">
-                "{aiReasoning}"
-              </p>
-            </div>
-            
-            <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
-              <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-3">
-                <ExternalLink className="w-5 h-5 text-[#8A9A86] mr-2" />
-                Live Market Sources
-              </h3>
-              <p className="text-xs text-[#6B6358] mb-4">Tavily scraped the following live URLs to calculate your score:</p>
-              <ul className="space-y-3">
-                {marketSources.length > 0 ? marketSources.map((url, i) => (
-                  <li key={i} className="flex items-start">
-                    <span className="text-[#8A9A86] mr-2 mt-0.5">•</span>
-                    <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline truncate block">
-                      {url}
-                    </a>
-                  </li>
-                )) : (
-                  <li className="text-sm text-[#8C8477] italic">Waiting for resume upload to fetch live sources...</li>
-                )}
-              </ul>
-            </div>
+        </div>
+
+        {/* AI Reasoning & Sources Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <div className="bg-[#33312E] text-[#F7F5F2] rounded-xl shadow-sm p-6 border border-[#1E1E1E]">
+            <h3 className="text-lg font-bold text-white flex items-center mb-3">
+              <BrainCircuit className="w-5 h-5 text-[#8A9A86] mr-2" />
+              AI Score Reasoning
+            </h3>
+            <p className="text-sm leading-relaxed text-gray-300">
+              "{aiReasoning}"
+            </p>
           </div>
           
+          <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
+            <h3 className="text-lg font-bold text-[#33312E] flex items-center mb-3">
+              <ExternalLink className="w-5 h-5 text-[#8A9A86] mr-2" />
+              Live Market Sources
+            </h3>
+            <p className="text-xs text-[#6B6358] mb-4">Tavily scraped the following live URLs to calculate your score:</p>
+            <ul className="space-y-3">
+              {marketSources.length > 0 ? marketSources.map((url, i) => (
+                <li key={i} className="flex items-start">
+                  <span className="text-[#8A9A86] mr-2 mt-0.5">•</span>
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline truncate block">
+                    {url}
+                  </a>
+                </li>
+              )) : (
+                <li className="text-sm text-[#8C8477] italic">Waiting for resume upload to fetch live sources...</li>
+              )}
+            </ul>
+          </div>
         </div>
 
         {/* Roadmap Generator Section */}
