@@ -244,7 +244,7 @@ export default function Dashboard() {
               <ul className="space-y-3">
                 {marketSources.length > 0 ? marketSources.map((url, i) => (
                   <li key={i} className="flex items-start">
-                    <span className="text-[#8A9A86] mr-2 mt-0.5">•</span>
+                    <span className="text-[#8A9A86] mr-2 mt-0.5">â€¢</span>
                     <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline truncate block">
                       {url}
                     </a>
@@ -288,4 +288,4 @@ export default function Dashboard() {
       </main>
     </div>
   );
-}
+}
