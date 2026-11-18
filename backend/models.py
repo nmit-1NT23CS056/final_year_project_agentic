@@ -40,3 +40,15 @@ class JobMatch(Base):
     match_score = Column(String)
     tailored_cover_letter = Column(String)
     status = Column(String, default="Found")
+    
+    # Real-World Portal & Application Kit Fields
+    job_url = Column(String, default="")
+    source_portal = Column(String, default="LinkedIn") # LinkedIn, Naukri, Internshala, Wellfound, Company Careers
+    location = Column(String, default="Remote / Hybrid")
+    employment_type = Column(String, default="Full-time") # Full-time, Internship, Contract
+    salary_range = Column(String, default="Competitive")
+    experience_level = Column(String, default="Fresher / 0-2 yrs")
+    matching_skills = Column(Text, default="[]") # JSON list of matched skills
+    missing_skills = Column(Text, default="[]") # JSON list of missing skills
+    application_status = Column(String, default="Saved") # "Saved", "Applied"
+    applied_at = Column(String, default="")
