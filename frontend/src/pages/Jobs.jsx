@@ -133,35 +133,43 @@ export default function Jobs() {
     document.body.removeChild(element);
   };
 
-  const handleApplyNow = async () => {
-    if (!selectedJob) return;
+  const getJobApplyUrl = (job) => {
+    if (job?.job_url && typeof job.job_url === 'string' && job.job_url.startsWith('http')) {
+      return job.job_url;
+    }
+    const query = encodeURIComponent(`${job?.company || ''} ${job?.job_title || ''}`.trim());
+    const portal = (job?.source_portal || 'linkedin').toLowerCase();
+    if (portal.includes('naukri')) {
+      return `https://www.naukri.com/jobs-in-india?k=${query}`;
+    } else if (portal.includes('internshala')) {
+      return `https://internshala.com/internships/keywords-${query}/`;
+    } else if (portal.includes('wellfound')) {
+      return `https://wellfound.com/jobs?query=${query}`;
+    }
+    return `https://www.linkedin.com/jobs/search/?keywords=${query}&location=India`;
+  };
 
-    // 1. Copy tailored cover letter to clipboard automatically
-    if (selectedJob.tailored_cover_letter) {
-      navigator.clipboard.writeText(selectedJob.tailored_cover_letter);
+  const handleApplyClick = (job) => {
+    if (!job) return;
+
+    // 1. Copy tailored cover letter to clipboard immediately
+    if (job.tailored_cover_letter) {
+      navigator.clipboard.writeText(job.tailored_cover_letter);
     }
 
-    // 2. Mark job as applied in backend
-    try {
-      const token = await getToken();
-      const res = await api.post(`/jobs/${selectedJob.id}/apply`, {}, {
+    // 2. Show toast notification
+    showToast(`🚀 Opening ${job.source_portal || 'Job Portal'}! Your tailored cover letter has been copied to your clipboard.`);
+
+    // 3. Mark applied in backend asynchronously
+    getToken().then(token => {
+      api.post(`/jobs/${job.id}/apply`, {}, {
         headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      const appliedTime = res.data.applied_at || 'Just now';
-      setSelectedJob(prev => ({ ...prev, application_status: 'Applied', applied_at: appliedTime }));
-      setJobs(prev => prev.map(j => j.id === selectedJob.id ? { ...j, application_status: 'Applied', applied_at: appliedTime } : j));
-    } catch (e) {
-      console.error("Could not update applied status:", e);
-    }
-
-    // 3. Open the actual job posting in a new window/tab
-    if (selectedJob.job_url) {
-      window.open(selectedJob.job_url, '_blank', 'noopener,noreferrer');
-    }
-
-    // 4. Show toast notification
-    showToast(`🚀 Opening ${selectedJob.source_portal || 'Job Portal'}! Your tailored cover letter has been copied to your clipboard.`);
+      }).then(res => {
+        const appliedTime = res.data.applied_at || 'Just now';
+        setSelectedJob(prev => prev && prev.id === job.id ? { ...prev, application_status: 'Applied', applied_at: appliedTime } : prev);
+        setJobs(prev => prev.map(j => j.id === job.id ? { ...j, application_status: 'Applied', applied_at: appliedTime } : j));
+      }).catch(err => console.error("Could not update applied status:", err));
+    }).catch(err => console.error(err));
   };
 
   // Helper to parse JSON arrays safely
@@ -448,14 +456,17 @@ export default function Jobs() {
 
                       {/* Primary Apply Button */}
                       <div className="flex flex-col items-end space-y-2 flex-none">
-                        <button
-                          onClick={handleApplyNow}
-                          className="flex items-center px-5 py-2.5 bg-[#8A9A86] hover:bg-[#73826F] text-white text-xs font-bold rounded-full shadow-sm transition transform hover:-translate-y-0.5"
+                        <a
+                          href={getJobApplyUrl(selectedJob)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => handleApplyClick(selectedJob)}
+                          className="flex items-center px-5 py-2.5 bg-[#8A9A86] hover:bg-[#73826F] text-white text-xs font-bold rounded-full shadow-sm transition transform hover:-translate-y-0.5 cursor-pointer no-underline"
                           title="Opens real job posting & copies your customized cover letter"
                         >
                           <span>Apply on {selectedJob.source_portal || 'Portal'}</span>
                           <ArrowUpRight className="w-4 h-4 ml-1.5" />
-                        </button>
+                        </a>
                         
                         {selectedJob.application_status === 'Applied' && (
                           <span className="text-[11px] text-emerald-700 font-medium flex items-center">
@@ -643,13 +654,16 @@ export default function Jobs() {
                       Authentic link verified for {selectedJob.source_portal || 'Portal'}
                     </span>
 
-                    <button
-                      onClick={handleApplyNow}
-                      className="flex items-center px-6 py-2 bg-[#8A9A86] hover:bg-[#73826F] text-white text-xs font-bold rounded-full shadow-sm transition"
+                    <a
+                      href={getJobApplyUrl(selectedJob)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => handleApplyClick(selectedJob)}
+                      className="flex items-center px-6 py-2 bg-[#8A9A86] hover:bg-[#73826F] text-white text-xs font-bold rounded-full shadow-sm transition cursor-pointer no-underline"
                     >
                       <ArrowUpRight className="w-4 h-4 mr-1.5" />
                       <span>Proceed to Apply on {selectedJob.source_portal || 'Portal'}</span>
-                    </button>
+                    </a>
                   </div>
                 </div>
               ) : (
