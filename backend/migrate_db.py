@@ -15,7 +15,11 @@ new_cols = [
     ("human_goal", "TEXT DEFAULT ''"),
     ("domain_marks", "TEXT DEFAULT '{}'"),
     ("adaptive_duration", "TEXT DEFAULT ''"),
-    ("topic_dependencies", "TEXT DEFAULT '[]'")
+    ("topic_dependencies", "TEXT DEFAULT '[]'"),
+    ("technical_identity", "TEXT DEFAULT ''"),
+    ("executive_summary", "TEXT DEFAULT ''"),
+    ("architectural_pillars", "TEXT DEFAULT '[]'"),
+    ("growth_milestones", "TEXT DEFAULT '[]'")
 ]
 
 job_new_cols = [

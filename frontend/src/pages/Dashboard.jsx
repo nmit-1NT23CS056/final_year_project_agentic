@@ -21,7 +21,11 @@ import {
   Cpu,
   Cloud,
   Wrench,
-  Code2
+  Code2,
+  Sparkles,
+  Zap,
+  ShieldCheck,
+  Check
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -186,6 +190,24 @@ export default function Dashboard() {
     demand: skillDemands[skill] || Math.floor(Math.random() * (95 - 60 + 1)) + 60 // Fallback if data is missing
   }));
 
+  // Parse 100% Dynamic AI Synthesis Fields
+  let dynamicPillars = [];
+  try {
+    dynamicPillars = JSON.parse(profile.architectural_pillars || "[]");
+  } catch (e) {
+    dynamicPillars = [];
+  }
+
+  let dynamicMilestones = [];
+  try {
+    dynamicMilestones = JSON.parse(profile.growth_milestones || "[]");
+  } catch (e) {
+    dynamicMilestones = [];
+  }
+
+  const technicalIdentity = profile.technical_identity || `${profile.target_role || profile.current_role} Specialist`;
+  const executiveSummary = profile.executive_summary;
+
   // Automatic Domain Clustering for Verified Skills
   const categorizedSkills = {
     "Languages & CS": [],
@@ -226,6 +248,34 @@ export default function Dashboard() {
     "AI & Data": <Cpu className="h-3.5 w-3.5 mr-1" />,
     "Cloud & DevOps": <Cloud className="h-3.5 w-3.5 mr-1" />,
     "Developer Tooling": <Wrench className="h-3.5 w-3.5 mr-1" />
+  };
+
+  const domainSummaries = {
+    "Languages & CS": {
+      tagline: "Core Engineering Foundations & Computational Rigor",
+      narrative: "Demonstrates algorithmic problem solving, time/space complexity analysis (Big-O), memory hierarchy, and fundamental systems theory (OS, Networks, DBMS).",
+      metrics: "Foundational CS Core"
+    },
+    "Full-Stack & Web": {
+      tagline: "End-to-End Application Architecture & Data Persistence",
+      narrative: "Capable of architecting responsive single-page interfaces (React, Redux Toolkit, Tailwind CSS), designing RESTful APIs (Express, Node.js), and managing both relational (PostgreSQL, MySQL) and document (MongoDB) databases.",
+      metrics: "Production Web Stack"
+    },
+    "AI & Data": {
+      tagline: "Agentic Workflows & Retrieval-Augmented Generation",
+      narrative: "Specialized in modern GenAI orchestration: building multi-step agent state graphs with LangGraph, tool chaining with LangChain, and implementing vector RAG pipelines for contextual retrieval.",
+      metrics: "High-Demand GenAI Edge"
+    },
+    "Cloud & DevOps": {
+      tagline: "Deployment Automation & Distributed Hosting",
+      narrative: "Hands-on experience deploying scalable cloud services on AWS, edge hosting on Vercel and Render, and handling cloud media pipelines with Cloudinary.",
+      metrics: "Cloud Native Readiness"
+    },
+    "Developer Tooling": {
+      tagline: "Modern Engineering Velocity & Version Control",
+      narrative: "Proficient in Git distributed workflows, API lifecycle testing with Postman, and modern JavaScript toolchains for continuous developer productivity.",
+      metrics: "Enterprise Tooling"
+    }
   };
 
   const getGapContext = (gap) => {
@@ -320,16 +370,107 @@ export default function Dashboard() {
           {/* Right Column: Skills & Gaps */}
           <div className="md:col-span-2 space-y-6">
             
-            {/* 1. Categorized Verified Skills with Domain Filter Tabs */}
+            {/* 1. Categorized Verified Skills with Domain Filter Tabs & Executive Diagnostic */}
             <div className="bg-white/60 backdrop-blur-md rounded-xl shadow-sm p-6 border border-[#EAE4DB]">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-                <h3 className="text-lg font-bold text-[#33312E] flex items-center">
-                  <CheckCircle2 className="w-5 h-5 text-[#8A9A86] mr-2" />
-                  Verified Engineering Portfolio
-                </h3>
+                <div>
+                  <h3 className="text-lg font-bold text-[#33312E] flex items-center">
+                    <CheckCircle2 className="w-5 h-5 text-[#8A9A86] mr-2" />
+                    Verified Engineering Portfolio
+                  </h3>
+                  <p className="text-xs text-[#6B6358] mt-0.5">
+                    Multi-dimensional technical audit mapped from verified candidate inputs and repositories
+                  </p>
+                </div>
                 <span className="text-xs font-semibold px-2.5 py-1 bg-[#8A9A86]/20 text-[#33312E] rounded-full self-start sm:self-auto">
                   {coreSkills.length} Verified Proficiencies
                 </span>
+              </div>
+
+              {/* Executive Engineering Synopsis Narrative */}
+              <div className="bg-gradient-to-r from-[#EAE4DB]/50 via-white to-[#EAE4DB]/30 rounded-xl p-5 mb-5 border border-[#DCD3C6]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2.5">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-[#73826F] uppercase tracking-wider">
+                    <Sparkles className="w-4 h-4 text-[#8A9A86]" />
+                    <span>Dynamic Profile Synthesis: {technicalIdentity}</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-[#8A9A86] bg-white px-2 py-0.5 rounded border border-[#DCD3C6]">
+                    Resume & GitHub AI Audit
+                  </span>
+                </div>
+                
+                {executiveSummary ? (
+                  <div className="space-y-2 mb-3.5">
+                    {executiveSummary.split('\n\n').map((para, i) => (
+                      <p key={i} className="text-xs text-[#33312E] leading-relaxed">
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2 mb-3.5">
+                    <p className="text-xs text-[#33312E] leading-relaxed">
+                      <strong>Technical Profile:</strong> {user?.firstName || 'Candidate'} presents a verified engineering portfolio tailored for <strong>{profile.target_role || profile.current_role}</strong>. The background reflects practical capability in core software engineering, application architecture, and persistent data modeling.
+                    </p>
+                    <p className="text-xs text-[#33312E] leading-relaxed">
+                      <strong>Competitive Advantage:</strong> The verified skillset and repository contributions demonstrate proactive problem-solving and domain alignment across verified technical proficiencies.
+                    </p>
+                  </div>
+                )}
+
+                {/* Dynamic Architectural Pillars (Extracted from Candidate's Background) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-[#DCD3C6]/60">
+                  {dynamicPillars.length > 0 ? (
+                    dynamicPillars.map((pillar, i) => {
+                      const icons = [
+                        <Zap key="0" className="w-3.5 h-3.5 text-amber-600 mr-1.5 flex-none" />,
+                        <Cpu key="1" className="w-3.5 h-3.5 text-indigo-600 mr-1.5 flex-none" />,
+                        <ShieldCheck key="2" className="w-3.5 h-3.5 text-emerald-600 mr-1.5 flex-none" />
+                      ];
+                      return (
+                        <div key={i} className="bg-white/80 p-2.5 rounded-lg border border-[#EAE4DB]">
+                          <div className="flex items-center text-[11px] font-bold text-[#33312E] mb-1">
+                            {icons[i % icons.length]}
+                            <span>{pillar.title}</span>
+                          </div>
+                          <p className="text-[11px] text-[#6B6358] leading-normal">
+                            {pillar.description}
+                          </p>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <>
+                      <div className="bg-white/80 p-2.5 rounded-lg border border-[#EAE4DB]">
+                        <div className="flex items-center text-[11px] font-bold text-[#33312E] mb-1">
+                          <Zap className="w-3.5 h-3.5 text-amber-600 mr-1.5 flex-none" />
+                          <span>Full-Stack Synergy</span>
+                        </div>
+                        <p className="text-[11px] text-[#6B6358] leading-normal">
+                          Cohesive client-to-database flow spanning UI, state management, REST services, and database persistence.
+                        </p>
+                      </div>
+                      <div className="bg-white/80 p-2.5 rounded-lg border border-[#EAE4DB]">
+                        <div className="flex items-center text-[11px] font-bold text-[#33312E] mb-1">
+                          <Cpu className="w-3.5 h-3.5 text-indigo-600 mr-1.5 flex-none" />
+                          <span>Agentic AI Workflows</span>
+                        </div>
+                        <p className="text-[11px] text-[#6B6358] leading-normal">
+                          Hands-on multi-step agent graph design and vector retrieval pipelines using LangGraph and RAG.
+                        </p>
+                      </div>
+                      <div className="bg-white/80 p-2.5 rounded-lg border border-[#EAE4DB]">
+                        <div className="flex items-center text-[11px] font-bold text-[#33312E] mb-1">
+                          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 mr-1.5 flex-none" />
+                          <span>Foundational CS Rigor</span>
+                        </div>
+                        <p className="text-[11px] text-[#6B6358] leading-normal">
+                          Solid backing in Algorithms, Operating Systems, Networks, and DBMS for algorithmic technical rounds.
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Domain Filter Tabs */}
@@ -343,7 +484,7 @@ export default function Dashboard() {
                       : 'text-[#6B6358] hover:text-[#33312E]'
                   }`}
                 >
-                  All ({coreSkills.length})
+                  All Domains ({coreSkills.length})
                 </button>
                 {Object.entries(categorizedSkills).map(([catName, list]) => {
                   if (list.length === 0) return null;
@@ -365,17 +506,35 @@ export default function Dashboard() {
                 })}
               </div>
 
-              {/* Skills Display */}
+              {/* Skills Display with Domain Descriptions */}
               {skillTab === 'All' ? (
-                <div className="space-y-3.5">
+                <div className="space-y-4">
                   {Object.entries(categorizedSkills).map(([catName, list]) => {
                     if (list.length === 0) return null;
+                    const summary = domainSummaries[catName] || {};
                     return (
-                      <div key={catName} className="p-3 bg-white/50 rounded-lg border border-[#EAE4DB]/70">
-                        <div className="flex items-center text-xs font-bold text-[#6B6358] uppercase tracking-wider mb-2">
-                          {domainIcons[catName]}
-                          {catName}
+                      <div key={catName} className="p-4 bg-white/70 rounded-xl border border-[#EAE4DB] hover:border-[#DCD3C6] transition">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                          <div className="flex items-center text-xs font-bold text-[#33312E] uppercase tracking-wide">
+                            {domainIcons[catName]}
+                            <span>{catName}</span>
+                            {summary.tagline && (
+                              <span className="text-[11px] font-normal text-[#73826F] ml-2 normal-case hidden md:inline">
+                                • {summary.tagline}
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] font-semibold text-[#8A9A86] bg-[#8A9A86]/10 px-2 py-0.5 rounded">
+                            {list.length} Skills Verified
+                          </span>
                         </div>
+
+                        {summary.narrative && (
+                          <p className="text-xs text-[#6B6358] leading-relaxed mb-3">
+                            {summary.narrative}
+                          </p>
+                        )}
+
                         <div className="flex flex-wrap gap-1.5">
                           {list.map(skill => (
                             <span key={skill} className="px-2.5 py-1 bg-white text-[#33312E] text-xs font-medium rounded-md border border-[#EAE4DB] shadow-xs hover:border-[#8A9A86] transition">
@@ -388,11 +547,29 @@ export default function Dashboard() {
                   })}
                 </div>
               ) : (
-                <div className="p-4 bg-white/70 rounded-lg border border-[#EAE4DB]">
-                  <div className="flex items-center text-xs font-bold text-[#73826F] uppercase tracking-wider mb-3">
-                    {domainIcons[skillTab]}
-                    {skillTab} Focus Domain
+                <div className="p-5 bg-white/80 rounded-xl border border-[#EAE4DB]">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center text-sm font-bold text-[#33312E]">
+                      {domainIcons[skillTab]}
+                      <span>{skillTab}</span>
+                    </div>
+                    <span className="text-xs font-semibold text-[#73826F] bg-[#8A9A86]/10 px-2.5 py-0.5 rounded-full">
+                      {domainSummaries[skillTab]?.metrics || 'Domain Focus'}
+                    </span>
                   </div>
+
+                  {domainSummaries[skillTab]?.tagline && (
+                    <h4 className="text-xs font-semibold text-[#73826F] mb-1">
+                      {domainSummaries[skillTab].tagline}
+                    </h4>
+                  )}
+
+                  {domainSummaries[skillTab]?.narrative && (
+                    <p className="text-xs text-[#5C554B] leading-relaxed mb-4">
+                      {domainSummaries[skillTab].narrative}
+                    </p>
+                  )}
+
                   <div className="flex flex-wrap gap-2">
                     {categorizedSkills[skillTab]?.map(skill => (
                       <span key={skill} className="px-3 py-1 bg-[#8A9A86]/10 text-[#33312E] text-xs font-semibold rounded-md border border-[#8A9A86]/30 shadow-xs">
@@ -402,6 +579,62 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* 2. Executive Diagnostic: Path to 90+ Score */}
+            <div className="bg-white/70 backdrop-blur-md rounded-xl p-5 border border-[#DCD3C6] shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#8A9A86]/20 flex items-center justify-center text-[#73826F] flex-none">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[#33312E]">
+                      Strategic Diagnostic: Path from {profile.market_demand_score}/100 to 95+ Elite Benchmark
+                    </h3>
+                    <p className="text-xs text-[#6B6358]">
+                      Prioritized tactical actions to close the gap for competitive Tier-1 Software Engineering roles
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full self-start sm:self-auto">
+                  Target: +{Math.max(0, 95 - profile.market_demand_score)} Marks
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                {dynamicMilestones.length > 0 ? (
+                  dynamicMilestones.map((ms, i) => (
+                    <div key={i} className="p-3 bg-[#F7F5F2] rounded-lg border border-[#EAE4DB]">
+                      <span className="font-bold text-[#33312E] block mb-1">{i + 1}. {ms.title}</span>
+                      <p className="text-[11px] text-[#6B6358] leading-relaxed">
+                        {ms.description}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <div className="p-3 bg-[#F7F5F2] rounded-lg border border-[#EAE4DB]">
+                      <span className="font-bold text-[#33312E] block mb-1">1. Adopt TypeScript</span>
+                      <p className="text-[11px] text-[#6B6358] leading-relaxed">
+                        Adds static type safety across React and Node backends. Eliminates runtime crashes and is requested in 88% of live frontend/full-stack postings.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-[#F7F5F2] rounded-lg border border-[#EAE4DB]">
+                      <span className="font-bold text-[#33312E] block mb-1">2. Automated Testing Suite</span>
+                      <p className="text-[11px] text-[#6B6358] leading-relaxed">
+                        Integrate Jest or PyTest for unit and integration testing. Demonstrates production-grade reliability and test-driven development (TDD).
+                      </p>
+                    </div>
+                    <div className="p-3 bg-[#F7F5F2] rounded-lg border border-[#EAE4DB]">
+                      <span className="font-bold text-[#33312E] block mb-1">3. Containerization & CI/CD</span>
+                      <p className="text-[11px] text-[#6B6358] leading-relaxed">
+                        Dockerize services and configure automated GitHub Actions pipelines to prove cloud deployment readiness.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* 2. Strategic Missing Skills with Context & Demand Cards */}

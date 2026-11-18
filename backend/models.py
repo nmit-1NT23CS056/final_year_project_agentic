@@ -28,6 +28,12 @@ class CandidateProfile(Base):
     domain_marks = Column(Text, default="{}") # JSON string mapping domains to marks scored & max marks
     adaptive_duration = Column(String, default="") # e.g. "2 Weeks Sprint"
     topic_dependencies = Column(Text, default="[]") # JSON string of DAG dependencies
+    
+    # 100% Dynamic Resume & GitHub AI Synthesis Fields
+    technical_identity = Column(String, default="")
+    executive_summary = Column(Text, default="")
+    architectural_pillars = Column(Text, default="[]") # JSON string of [{title, description}]
+    growth_milestones = Column(Text, default="[]") # JSON string of [{title, description}]
 
 class JobMatch(Base):
     __tablename__ = "job_matches"
