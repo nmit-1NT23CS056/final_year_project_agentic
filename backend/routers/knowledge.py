@@ -2,19 +2,20 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 import os
 import shutil
 import tempfile
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
-from langchain_chroma import Chroma
 
 router = APIRouter(prefix="/api/knowledge", tags=["knowledge"])
 
 CHROMA_PATH = "./chroma_db"
 
 def get_vectorstore():
-    # We use Google's free embedding model!
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    return Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
+    try:
+        from langchain_google_genai import GoogleGenerativeAIEmbeddings
+        from langchain_chroma import Chroma
+        # We use Google's free embedding model!
+        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+        return Chroma(persist_directory=CHROMA_PATH, embedding_function=embeddings)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"ChromaDB embedding engine not initialized: {str(e)}")
 
 @router.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
@@ -22,6 +23,9 @@ async def upload_document(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Only PDF files are supported for RAG.")
         
     try:
+        from langchain_community.document_loaders import PyPDFLoader
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        
         # 1. Save uploaded PDF to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
             shutil.copyfileobj(file.file, tmp)

@@ -9,6 +9,7 @@ langchain
 langchain-community
 langchain-core
 langchain-google-genai
+langchain-chroma
 langgraph
 google-genai
 tavily-python
