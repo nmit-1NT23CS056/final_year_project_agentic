@@ -28,10 +28,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Career Advisory Agent API", lifespan=lifespan)
 
-# Configure CORS for the React frontend
+# Configure CORS for the React frontend (Local & Vercel Production)
+frontend_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+]
+custom_frontend_url = os.environ.get("FRONTEND_URL")
+if custom_frontend_url:
+    frontend_origins.append(custom_frontend_url.rstrip("/"))
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"], # Vite default port
+    allow_origins=frontend_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

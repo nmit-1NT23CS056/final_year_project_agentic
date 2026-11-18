@@ -4,7 +4,7 @@ import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
 import { BrainCircuit, Send, User, Volume2, Bot, Sparkles, Check, Copy } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import api from '../lib/axios';
+import api, { BACKEND_URL } from '../lib/axios';
 
 export default function Interview() {
   const { user } = useUser();
@@ -83,7 +83,7 @@ export default function Interview() {
     try {
       const token = await getToken();
       
-      const response = await fetch('http://localhost:8000/interview/chat', {
+      const response = await fetch(`${BACKEND_URL}/interview/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

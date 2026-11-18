@@ -40,6 +40,7 @@ import {
   PolarAngleAxis, 
   PolarRadiusAxis 
 } from 'recharts';
+import { API_BASE_URL } from '../lib/axios';
 
 export default function Dashboard() {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -55,7 +56,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (isLoaded && isSignedIn) {
       getToken().then(token => {
-        fetch('http://localhost:8000/api/profile/', {
+        fetch(`${API_BASE_URL}/profile/`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
         .then(res => res.json())
@@ -83,7 +84,7 @@ export default function Dashboard() {
     setGenerating(true);
     try {
       const token = await getToken();
-      const res = await fetch('http://localhost:8000/api/roadmap/generate', {
+      const res = await fetch(`${API_BASE_URL}/roadmap/generate`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
