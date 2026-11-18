@@ -241,62 +241,62 @@ export default function Jobs() {
         </div>
       )}
 
-      <main className="max-w-7xl mx-auto w-full p-6 md:p-8 flex-1 flex flex-col">
-        {/* Header Banner */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 pb-6 border-b border-[#DCD3C6] gap-4">
+      <main className="max-w-7xl mx-auto w-full px-6 py-4 flex-1 flex flex-col">
+        {/* Header Banner - Sleek & Compact */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 pb-3 border-b border-[#DCD3C6] gap-3">
           <div>
-            <div className="flex items-center space-x-3">
-              <h1 className="text-3xl md:text-4xl font-bold text-[#33312E]" style={{ fontFamily: 'Georgia, serif' }}>
+            <div className="flex items-center space-x-2.5">
+              <h1 className="text-2xl font-bold text-[#33312E]" style={{ fontFamily: 'Georgia, serif' }}>
                 Autonomous Job Discovery
               </h1>
-              <span className="bg-[#8A9A86]/20 text-[#73826F] text-xs font-semibold px-3 py-1 rounded-full border border-[#8A9A86]/30">
+              <span className="bg-[#8A9A86]/20 text-[#73826F] text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-[#8A9A86]/30">
                 Live Market Sync
               </span>
             </div>
-            <p className="text-[#6B6358] text-sm mt-1.5">
+            <p className="text-[#6B6358] text-xs mt-0.5">
               Live job opportunities fetched across <strong>LinkedIn, Naukri, Internshala & Wellfound</strong> with AI-tailored application kits.
             </p>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 flex-none">
             <button 
               onClick={handleScan}
               disabled={scanning}
-              className="flex items-center px-6 py-3 bg-[#33312E] text-white font-medium rounded-full hover:bg-black shadow-sm transition disabled:opacity-50"
+              className="flex items-center px-5 py-2.5 bg-[#33312E] text-white text-xs font-semibold rounded-full hover:bg-black shadow-sm transition disabled:opacity-50"
             >
               {scanning ? (
-                <><Loader2 className="w-4 h-4 mr-2 animate-spin text-[#8A9A86]" /> Scanning Live Portals...</>
+                <><Loader2 className="w-3.5 h-3.5 mr-2 animate-spin text-[#8A9A86]" /> Scanning Live Portals...</>
               ) : (
-                <><Sparkles className="w-4 h-4 mr-2 text-[#8A9A86]" /> Scan Live Openings</>
+                <><Sparkles className="w-3.5 h-3.5 mr-1.5 text-[#8A9A86]" /> Scan Live Openings</>
               )}
             </button>
           </div>
         </div>
 
-        {/* Filter & Search Bar */}
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-[#EAE4DB] p-4 mb-6 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+        {/* Filter & Search Bar - Slim & Ergonomic */}
+        <div className="bg-white/80 backdrop-blur-md rounded-xl border border-[#EAE4DB] px-4 py-2 mb-4 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
           {/* Search box */}
-          <div className="relative w-full md:w-80">
-            <Search className="w-4 h-4 text-[#8C8477] absolute left-3.5 top-3" />
+          <div className="relative w-full md:w-72">
+            <Search className="w-3.5 h-3.5 text-[#8C8477] absolute left-3 top-2.5" />
             <input 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by role, company, city..."
-              className="w-full bg-[#F7F5F2] border border-[#DCD3C6] rounded-full pl-10 pr-4 py-2 text-xs text-[#33312E] focus:outline-none focus:ring-2 focus:ring-[#8A9A86]"
+              className="w-full bg-[#F7F5F2] border border-[#DCD3C6] rounded-full pl-9 pr-3 py-1.5 text-xs text-[#33312E] focus:outline-none focus:ring-2 focus:ring-[#8A9A86]"
             />
           </div>
 
           {/* Platform Filters */}
-          <div className="flex items-center space-x-2 overflow-x-auto w-full md:w-auto scrollbar-none">
-            <span className="text-xs text-[#6B6358] font-medium mr-1 flex items-center">
-              <Filter className="w-3.5 h-3.5 mr-1" /> Portal:
+          <div className="flex items-center space-x-1.5 overflow-x-auto w-full md:w-auto scrollbar-none">
+            <span className="text-[11px] text-[#6B6358] font-medium mr-1 flex items-center">
+              <Filter className="w-3 h-3 mr-1" /> Portal:
             </span>
             {['All', 'LinkedIn', 'Naukri', 'Internshala', 'Wellfound'].map((platform) => (
               <button
                 key={platform}
                 onClick={() => setFilterPlatform(platform)}
-                className={`text-xs px-3.5 py-1.5 rounded-full border transition whitespace-nowrap ${
+                className={`text-xs px-3 py-1 rounded-full border transition whitespace-nowrap ${
                   filterPlatform === platform 
                     ? 'bg-[#33312E] text-white border-[#33312E] font-medium' 
                     : 'bg-[#F7F5F2] text-[#5C554B] border-[#DCD3C6] hover:bg-[#EAE4DB]'
@@ -311,14 +311,14 @@ export default function Jobs() {
           <div className="flex items-center space-x-2 self-end md:self-center">
             <button
               onClick={() => setShowAppliedOnly(!showAppliedOnly)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition flex items-center space-x-1.5 ${
+              className={`text-xs px-3 py-1 rounded-full border transition flex items-center space-x-1.5 ${
                 showAppliedOnly 
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-300 font-semibold' 
                   : 'bg-[#F7F5F2] text-[#5C554B] border-[#DCD3C6] hover:bg-[#EAE4DB]'
               }`}
             >
               <BookmarkCheck className="w-3.5 h-3.5" />
-              <span>Applied Only ({appliedCount})</span>
+              <span>Applied ({appliedCount})</span>
             </button>
           </div>
         </div>
@@ -359,9 +359,9 @@ export default function Jobs() {
           </div>
         ) : (
           /* Split View Portal */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 min-h-[600px] pb-6">
             {/* Left Column: Job Cards List (5 cols) */}
-            <div className="lg:col-span-5 space-y-3 overflow-y-auto max-h-[calc(100vh-280px)] pr-1">
+            <div className="lg:col-span-5 space-y-2.5 overflow-y-auto max-h-[calc(100vh-180px)] pr-1">
               <div className="text-xs text-[#6B6358] font-medium px-1 flex justify-between items-center mb-1">
                 <span>Showing {filteredJobs.length} Verified Openings</span>
                 <span>Sorted by Profile Match</span>
@@ -376,20 +376,20 @@ export default function Jobs() {
                   <div
                     key={job.id}
                     onClick={() => selectJobCard(job)}
-                    className={`bg-white/80 backdrop-blur-md rounded-2xl p-5 border cursor-pointer transition-all duration-200 relative ${
+                    className={`bg-white/80 backdrop-blur-md rounded-xl p-4 border cursor-pointer transition-all duration-200 relative ${
                       isSelected 
                         ? 'border-[#8A9A86] shadow-md ring-2 ring-[#8A9A86]/20 bg-white' 
                         : 'border-[#EAE4DB] hover:border-[#DCD3C6] hover:shadow-sm'
                     }`}
                   >
                     {/* Top Row: Portal & Match % */}
-                    <div className="flex justify-between items-center mb-2">
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badge.bg}`}>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badge.bg}`}>
                         {badge.name}
                       </span>
                       <div className="flex items-center space-x-2">
                         {isApplied && (
-                          <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center">
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center">
                             <Check className="w-3 h-3 mr-0.5" /> Applied
                           </span>
                         )}
@@ -400,26 +400,26 @@ export default function Jobs() {
                     </div>
 
                     {/* Job Title & Company */}
-                    <h3 className="font-bold text-base text-[#33312E] leading-tight mb-1">
+                    <h3 className="font-bold text-sm text-[#33312E] leading-tight mb-0.5">
                       {job.job_title}
                     </h3>
-                    <p className="text-xs font-semibold text-[#73826F] mb-3 flex items-center">
-                      <Building2 className="w-3.5 h-3.5 mr-1" />
+                    <p className="text-xs font-semibold text-[#73826F] mb-2 flex items-center">
+                      <Building2 className="w-3 h-3 mr-1" />
                       {job.company}
                     </p>
 
                     {/* Metadata Badges */}
-                    <div className="flex flex-wrap gap-2 text-[11px] text-[#6B6358] mb-2.5">
+                    <div className="flex flex-wrap gap-1.5 text-[10px] text-[#6B6358]">
                       <span className="flex items-center bg-[#F7F5F2] px-2 py-0.5 rounded-md border border-[#EAE4DB]">
-                        <MapPin className="w-3 h-3 mr-1 text-[#8A9A86]" />
+                        <MapPin className="w-2.5 h-2.5 mr-1 text-[#8A9A86]" />
                         {job.location || 'Remote / Hybrid'}
                       </span>
                       <span className="flex items-center bg-[#F7F5F2] px-2 py-0.5 rounded-md border border-[#EAE4DB]">
-                        <DollarSign className="w-3 h-3 mr-1 text-[#8A9A86]" />
+                        <DollarSign className="w-2.5 h-2.5 mr-1 text-[#8A9A86]" />
                         {job.salary_range || 'Competitive'}
                       </span>
                       <span className="flex items-center bg-[#F7F5F2] px-2 py-0.5 rounded-md border border-[#EAE4DB]">
-                        <Clock className="w-3 h-3 mr-1 text-[#8A9A86]" />
+                        <Clock className="w-2.5 h-2.5 mr-1 text-[#8A9A86]" />
                         {job.experience_level || '0-2 yrs'}
                       </span>
                     </div>
@@ -431,45 +431,45 @@ export default function Jobs() {
             {/* Right Column: Job Detailed Inspector & Application Kit (7 cols) */}
             <div className="lg:col-span-7 flex flex-col">
               {selectedJob ? (
-                <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-sm border border-[#EAE4DB] overflow-hidden flex flex-col h-full max-h-[calc(100vh-280px)]">
-                  {/* Top Bar of Right Panel */}
-                  <div className="p-6 border-b border-[#DCD3C6] bg-gradient-to-b from-[#EAE4DB]/50 to-white flex-none">
-                    <div className="flex justify-between items-start gap-4">
+                <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-sm border border-[#EAE4DB] overflow-hidden flex flex-col h-full max-h-[calc(100vh-180px)]">
+                  {/* Top Bar of Right Panel - Clean & Compact */}
+                  <div className="px-5 py-3.5 border-b border-[#DCD3C6] bg-gradient-to-b from-[#EAE4DB]/40 to-white flex-none">
+                    <div className="flex justify-between items-start gap-3">
                       <div>
-                        <div className="flex items-center space-x-2 mb-1.5">
-                          <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${getPortalBadge(selectedJob.source_portal).bg}`}>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getPortalBadge(selectedJob.source_portal).bg}`}>
                             {getPortalBadge(selectedJob.source_portal).name} Listing
                           </span>
-                          <span className="text-xs font-semibold text-[#8A9A86] bg-[#8A9A86]/10 px-2.5 py-0.5 rounded-full">
+                          <span className="text-[10px] font-semibold text-[#8A9A86] bg-[#8A9A86]/10 px-2 py-0.5 rounded-full">
                             {selectedJob.employment_type || 'Full-time'}
                           </span>
                         </div>
-                        <h2 className="text-2xl font-bold text-[#33312E]" style={{ fontFamily: 'Georgia, serif' }}>
+                        <h2 className="text-xl font-bold text-[#33312E]" style={{ fontFamily: 'Georgia, serif' }}>
                           {selectedJob.job_title}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-4 text-xs text-[#5C554B] mt-2">
-                          <span className="font-semibold text-sm text-[#73826F]">{selectedJob.company}</span>
-                          <span className="flex items-center"><MapPin className="w-3.5 h-3.5 mr-1 text-[#8A9A86]" /> {selectedJob.location}</span>
-                          <span className="flex items-center"><DollarSign className="w-3.5 h-3.5 mr-1 text-[#8A9A86]" /> {selectedJob.salary_range}</span>
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-[#5C554B] mt-1">
+                          <span className="font-semibold text-xs text-[#73826F]">{selectedJob.company}</span>
+                          <span className="flex items-center"><MapPin className="w-3 h-3 mr-1 text-[#8A9A86]" /> {selectedJob.location}</span>
+                          <span className="flex items-center"><DollarSign className="w-3 h-3 mr-1 text-[#8A9A86]" /> {selectedJob.salary_range}</span>
                         </div>
                       </div>
 
                       {/* Primary Apply Button */}
-                      <div className="flex flex-col items-end space-y-2 flex-none">
+                      <div className="flex flex-col items-end space-y-1 flex-none">
                         <a
                           href={getJobApplyUrl(selectedJob)}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={() => handleApplyClick(selectedJob)}
-                          className="flex items-center px-5 py-2.5 bg-[#8A9A86] hover:bg-[#73826F] text-white text-xs font-bold rounded-full shadow-sm transition transform hover:-translate-y-0.5 cursor-pointer no-underline"
+                          className="flex items-center px-4 py-2 bg-[#8A9A86] hover:bg-[#73826F] text-white text-xs font-bold rounded-full shadow-sm transition transform hover:-translate-y-0.5 cursor-pointer no-underline"
                           title="Opens real job posting & copies your customized cover letter"
                         >
                           <span>Apply on {selectedJob.source_portal || 'Portal'}</span>
-                          <ArrowUpRight className="w-4 h-4 ml-1.5" />
+                          <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
                         </a>
                         
                         {selectedJob.application_status === 'Applied' && (
-                          <span className="text-[11px] text-emerald-700 font-medium flex items-center">
+                          <span className="text-[10px] text-emerald-700 font-medium flex items-center">
                             <CheckCircle className="w-3 h-3 mr-1" /> Applied {selectedJob.applied_at || ''}
                           </span>
                         )}
@@ -477,10 +477,10 @@ export default function Jobs() {
                     </div>
 
                     {/* Tab Navigation */}
-                    <div className="flex space-x-6 mt-6 border-b border-[#DCD3C6] -mb-6">
+                    <div className="flex space-x-6 mt-3 border-b border-[#DCD3C6] -mb-3.5">
                       <button
                         onClick={() => setActiveTab('jd')}
-                        className={`text-xs font-bold pb-3 border-b-2 transition flex items-center space-x-1.5 ${
+                        className={`text-xs font-bold pb-2 border-b-2 transition flex items-center space-x-1.5 ${
                           activeTab === 'jd' 
                             ? 'border-[#8A9A86] text-[#33312E]' 
                             : 'border-transparent text-[#6B6358] hover:text-[#33312E]'
@@ -491,7 +491,7 @@ export default function Jobs() {
                       </button>
                       <button
                         onClick={() => setActiveTab('cover_letter')}
-                        className={`text-xs font-bold pb-3 border-b-2 transition flex items-center space-x-1.5 ${
+                        className={`text-xs font-bold pb-2 border-b-2 transition flex items-center space-x-1.5 ${
                           activeTab === 'cover_letter' 
                             ? 'border-[#8A9A86] text-[#33312E]' 
                             : 'border-transparent text-[#6B6358] hover:text-[#33312E]'
@@ -503,8 +503,8 @@ export default function Jobs() {
                     </div>
                   </div>
 
-                  {/* Body Content of Right Panel */}
-                  <div className="p-6 flex-1 overflow-y-auto">
+                  {/* Body Content - Maximum Vertical Scrolling Space */}
+                  <div className="p-5 flex-1 overflow-y-auto">
                     {activeTab === 'jd' ? (
                       /* Tab 1: Detailed Job Description & Skill Comparison */
                       <div className="space-y-6">
@@ -645,25 +645,6 @@ export default function Jobs() {
                         )}
                       </div>
                     )}
-                  </div>
-
-                  {/* Bottom Footer Bar */}
-                  <div className="p-4 border-t border-[#DCD3C6] bg-[#EAE4DB]/30 flex-none flex justify-between items-center">
-                    <span className="text-xs text-[#6B6358] flex items-center">
-                      <Sparkles className="w-3.5 h-3.5 mr-1 text-[#8A9A86]" />
-                      Authentic link verified for {selectedJob.source_portal || 'Portal'}
-                    </span>
-
-                    <a
-                      href={getJobApplyUrl(selectedJob)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleApplyClick(selectedJob)}
-                      className="flex items-center px-6 py-2 bg-[#8A9A86] hover:bg-[#73826F] text-white text-xs font-bold rounded-full shadow-sm transition cursor-pointer no-underline"
-                    >
-                      <ArrowUpRight className="w-4 h-4 mr-1.5" />
-                      <span>Proceed to Apply on {selectedJob.source_portal || 'Portal'}</span>
-                    </a>
                   </div>
                 </div>
               ) : (

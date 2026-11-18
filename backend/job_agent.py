@@ -46,18 +46,40 @@ load_dotenv()
 def safe_invoke_llm(llm, prompt_messages):
     return llm.invoke(prompt_messages)
 
+import re
+
+def clean_search_term(text: str) -> str:
+    if not text:
+        return ""
+    # Remove parentheses and their contents, e.g. "(AI-Native / React & Node)" -> ""
+    cleaned = re.sub(r'\(.*?\)', '', text)
+    # Remove slash separated aggregator junk like "/ Various Remote Partners"
+    if '/' in cleaned:
+        cleaned = cleaned.split('/')[0]
+    # Remove special punctuation
+    cleaned = re.sub(r'[^\w\s-]', '', cleaned)
+    # Collapse whitespace
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned
+
 def build_portal_fallback_url(portal: str, company: str, title: str) -> str:
-    encoded_query = urllib.parse.quote(f"{company} {title}")
-    role_slug = urllib.parse.quote(title.lower().replace(" ", "-"))
+    clean_comp = clean_search_term(company)
+    clean_tit = clean_search_term(title)
     
-    if portal.lower() == "naukri":
+    # High-precision clean query (e.g., "Razorpay Software Engineer")
+    query_str = f"{clean_comp} {clean_tit}".strip()
+    encoded_query = urllib.parse.quote(query_str)
+    role_slug = urllib.parse.quote(clean_tit.lower().replace(" ", "-"))
+    
+    portal_lower = portal.lower()
+    if "naukri" in portal_lower:
         return f"https://www.naukri.com/{role_slug}-jobs-in-india?k={encoded_query}"
-    elif portal.lower() == "internshala":
-        return f"https://internshala.com/internships/matching-{role_slug}/"
-    elif portal.lower() == "wellfound":
+    elif "internshala" in portal_lower:
+        return f"https://internshala.com/internships/keywords-{role_slug}/"
+    elif "wellfound" in portal_lower:
         return f"https://wellfound.com/jobs?query={encoded_query}"
     else: # Default LinkedIn
-        return f"https://www.linkedin.com/jobs/search/?keywords={encoded_query}&location=India"
+        return f"https://www.linkedin.com/jobs/search/?keywords={encoded_query}&location=India&f_TPR=r2592000"
 
 def scan_for_jobs(profile_data: dict) -> list:
     print("Job Agent: Scanning for authentic portal jobs...")
@@ -95,31 +117,28 @@ def scan_for_jobs(profile_data: dict) -> list:
     
     TASK:
     Generate 3 to 4 realistic, high-fidelity job matches on authentic platforms (LinkedIn, Naukri, Internshala, Wellfound).
-    If search results contain live postings, prioritize those and use their real URLs.
-    If direct job posting URLs are missing or generic from the search, provide realistic top-tier Indian tech companies (e.g. Razorpay, Swiggy, PhonePe, Dev Monks, Postman, CRED, Zomato, TCS Digital, Zoho) hiring for this role.
     
-    For each job match, return:
-    - "job_title": Specific industry title (e.g. "Associate Software Engineer", "Junior Full-Stack Developer", "Frontend Intern")
-    - "company": Real company name
-    - "source_portal": One of "LinkedIn", "Naukri", "Internshala", or "Wellfound"
-    - "job_url": Real listing URL if found in search results, or empty string "" (we will auto-generate verified portal search URLs)
-    - "location": Realistic location e.g. "Bengaluru, Karnataka (Hybrid)", "Remote (India)", "Hyderabad (On-site)", "Pune (Hybrid)"
-    - "employment_type": "Full-time" or "Internship" (align with persona: {persona})
-    - "salary_range": Realistic salary e.g. "₹7 - ₹11 LPA" (for full-time) or "₹25,000 - ₹35,000 / mo" (for internships)
-    - "experience_level": e.g. "Fresher / 0-1 yrs" or "0-2 years"
-    - "job_description": Rich, multi-section markdown with:
+    CRITICAL QUALITY GUIDELINES:
+    1. "company": Must be a SINGLE, REAL, RECOGNIZED tech company name (e.g. "Razorpay", "Swiggy", "PhonePe", "Dev Monks", "Postman", "CRED", "Zomato", "TCS", "Infosys", "Zoho").
+       NEVER output messy strings like "JMAC Lending / Various Remote Partners" or aggregator phrases.
+    2. "job_title": Clean, standard job title (e.g. "Associate Software Engineer", "Junior Full-Stack Developer", "Frontend Engineering Intern"). Do not put run-on text in title.
+    3. "source_portal": One of "LinkedIn", "Naukri", "Internshala", or "Wellfound".
+    4. "job_url": Real listing URL if found in search results, or empty string "" (we will auto-generate verified portal search URLs).
+    5. "location": Realistic location e.g. "Bengaluru, Karnataka (Hybrid)", "Remote (India)", "Hyderabad (On-site)", "Pune (Hybrid)".
+    6. "employment_type": "Full-time" or "Internship" (align with persona: {persona}).
+    7. "salary_range": Realistic salary e.g. "₹8 - ₹12 LPA" (for full-time) or "₹25,000 - ₹35,000 / mo" (for internships).
+    8. "experience_level": e.g. "Fresher / 0-1 yrs" or "0-2 years".
+    9. "job_description": Rich, multi-section markdown with:
         ### About the Role
         ...
         ### Key Responsibilities
         - ...
-        - ...
         ### Requirements & Tech Stack
         - ...
-        - ...
-    - "matching_skills": Array of candidate skills that directly qualify them for this job
-    - "missing_skills": Array of 2-3 desirable skills in the JD that the candidate can learn
-    - "match_score": Realistic match percentage (e.g. "93%", "88%", "85%")
-    - "tailored_cover_letter": A compelling, professional 150-word cover letter specifically addressing the company and role, explaining why the candidate's exact stack ({skills}) makes them an ideal fit.
+    10. "matching_skills": Array of candidate skills that directly qualify them for this job.
+    11. "missing_skills": Array of 2-3 desirable skills in the JD that the candidate can learn.
+    12. "match_score": Realistic match percentage (e.g. "93%", "88%", "85%").
+    13. "tailored_cover_letter": A compelling, professional 150-word cover letter specifically addressing that single company and role, explaining why the candidate's exact stack ({skills}) makes them an ideal fit.
     
     Return the response ONLY as a JSON array of objects. NO EXTRANEOUS TEXT, NO MARKDOWN OUTSIDE THE JSON ARRAY.
     '''
