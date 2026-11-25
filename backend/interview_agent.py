@@ -18,7 +18,7 @@ class InterviewState(TypedDict):
 
 def interview_node(state: InterviewState):
     print("Interviewer: Processing user message...")
-    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
     
     system_prompt = f"""
     You are an elite Senior IT Technical Interviewer and Mentor.

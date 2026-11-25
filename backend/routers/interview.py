@@ -25,7 +25,7 @@ def get_mem0_config():
         "llm": {
             "provider": "gemini",
             "config": {
-                "model": "gemini-2.0-flash",
+                "model": "gemini-2.5-flash",
                 "api_key": api_key,
             }
         },
@@ -124,7 +124,7 @@ async def chat_with_interviewer(request: ChatRequest, current_user_id: str = Dep
             
     messages.append(HumanMessage(content=request.message))
     
-    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=os.environ.get("GEMINI_API_KEY"), temperature=0.7, max_retries=5)
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=os.environ.get("GEMINI_API_KEY"), temperature=0.7, max_retries=5)
     
     # We will accumulate the response to save it to memory
     response_container = {"text": ""}
