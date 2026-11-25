@@ -68,7 +68,7 @@ def calculate_adaptive_timeline(profile: Dict[str, Any]) -> Dict[str, Any]:
 
 def strategist_node(state: AgentState):
     print("Strategist: Drafting the adaptive roadmap with DAG dependencies and actionable sources...")
-    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
     profile = state.get("profile_data", {})
     
     # Calculate adaptive timeline based on persona and hours
@@ -150,7 +150,7 @@ def strategist_node(state: AgentState):
 
 def critic_node(state: AgentState):
     print(f"Critic: Evaluating adaptive roadmap (Revision {state['revision_count']})...")
-    llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", google_api_key=os.environ.get("GEMINI_API_KEY"))
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=os.environ.get("GEMINI_API_KEY"))
     
     prompt = f'''
     You are an elite Academic and Industry Technical Bar Raiser.

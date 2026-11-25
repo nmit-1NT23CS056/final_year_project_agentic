@@ -125,7 +125,7 @@ def synthesize_dynamic_profile(profile: models.CandidateProfile, db: Session):
     '''
     
     try:
-        response = safe_generate_content(client=client, model='gemini-3.5-flash-lite', contents=prompt)
+        response = safe_generate_content(client=client, model='gemini-2.0-flash', contents=prompt)
         json_text = response.text.replace("```json", "").replace("```", "").strip()
         data = json.loads(json_text)
         
@@ -208,7 +208,7 @@ async def parse_resume(
         
         response = safe_generate_content(
             client=client,
-            model='gemini-3.5-flash-lite',
+            model='gemini-2.0-flash',
             contents=prompt
         )
         
@@ -303,7 +303,7 @@ async def parse_resume(
         '''
         gap_response = safe_generate_content(
             client=client,
-            model='gemini-3.5-flash-lite',
+            model='gemini-2.0-flash',
             contents=gap_prompt
         )
         
